@@ -236,7 +236,16 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
  // Static bride and groom on the stage. The five experimental action animations have been removed.
  drawSprite(ctx,Math.round(W*.465-24),Math.round(H*.30),1.9,{gender:'masculine',skin:'#f1c6a5',hair:'short',hairColor:'#302a2b',outfit:'suit',outfitColor:'#343c50',accessory:'none'});
  drawSprite(ctx,Math.round(W*.535-24),Math.round(H*.30),1.9,{gender:'feminine',skin:'#f7d7b5',hair:'long',hairColor:'#67432f',outfit:'dress',outfitColor:'#fff0d1',accessory:'flower'});
- ctx.fillStyle='#fff0cf';ctx.font='bold 17px "Gowun Dodum",sans-serif';ctx.textAlign='center';ctx.fillText('윤성 ♥ 소미',W*.5,H*.30+88);
+
+ctx.textAlign = 'center';
+ctx.font = 'bold 20px "Gowun Dodum", sans-serif';
+ctx.lineJoin = 'round';
+ctx.lineWidth = 6;
+ctx.strokeStyle = '#202020';
+ctx.strokeText('윤성 ♥ 소미', W * 0.5, H * 0.30 + 88);
+ctx.fillStyle = '#ffffff';
+ctx.fillText('윤성 ♥ 소미', W * 0.5, H * 0.30 + 88);
+
  const top=showTitle?Math.round(H*.53):Math.round(H*.49), cols=Math.max(1,Math.floor(W/150)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
  items.forEach((g,i)=>{
   if(active>=0 && bubbles==='sequence' && i!==active){} // still draw all avatars
