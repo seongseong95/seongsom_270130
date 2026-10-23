@@ -262,7 +262,14 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
   ctx.rotate(walkLean);
   drawSprite(ctx,-36, -30,1.5,g.avatar);
   ctx.restore();
-  ctx.textAlign='center';ctx.fillStyle='#30332d';ctx.font='bold 16px "Gowun Dodum",sans-serif';ctx.fillText(g.name,x,y+72,cellW-10);
+  ctx.textAlign='center';ctx.fillStyle='#30332d';ctx.font='bold 16px "Gowun Dodum",sans-serif';ctx.textAlign = 'center';
+ctx.font = 'bold 20px "Gowun Dodum", sans-serif';
+ctx.lineJoin = 'round';
+ctx.lineWidth = 6;
+ctx.strokeStyle = '#202020';
+ctx.strokeText(g.name, x, y + 72, cellW - 10);
+ctx.fillStyle = '#ffffff';
+ctx.fillText(g.name, x, y + 72, cellW - 10);
  });
  if(showTitle){ctx.fillStyle='#30332d';ctx.textAlign='center';ctx.font='16px "Gowun Dodum",sans-serif';ctx.fillText(`${items.length}명의 마음이 함께합니다`,W/2,H-22)}
 }
