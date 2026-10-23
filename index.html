@@ -8,12 +8,12 @@
 <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Gowun+Dodum&display=swap" rel="stylesheet">
 <style>
 :root{--paper:#fbf4df;--ink:#282b28;--muted:#737469;--green:#b9d7a8;--pink:#f2b9bd;--yellow:#f6dc88;--blue:#b9d9e9;--line:#34382f;--white:#fffdf7}
-*{box-sizing:border-box}body{margin:0;background:var(--paper);color:var(--ink);font-family:"Gowun Dodum",sans-serif}
+*{box-sizing:border-box}body{margin:0;background:linear-gradient(180deg,#252d43 0,#6b5b63 250px,#f7e9cf 520px,var(--paper) 800px);color:var(--ink);font-family:"Gowun Dodum",sans-serif}
 body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.2;background-image:radial-gradient(#aaa084 .7px,transparent .7px);background-size:7px 7px}
-header{text-align:center;padding:38px 16px 26px;background:#fff9e9;border-bottom:3px solid var(--line)}
+header{text-align:center;padding:38px 16px 26px;background:linear-gradient(180deg,rgba(30,38,58,.93),rgba(80,63,69,.94));color:#fff3d7;border-bottom:4px solid #d5b76c;position:relative;overflow:hidden}header:before,header:after{content:"✦  ✧  ✦  ✧  ✦";position:absolute;left:0;right:0;color:#f7d990;opacity:.75;letter-spacing:18px;font-size:18px;animation:twinkle 3s ease-in-out infinite alternate}header:before{top:8px}header:after{bottom:8px}@keyframes twinkle{from{opacity:.35;transform:translateY(0)}to{opacity:.9;transform:translateY(3px)}}
 .pixel{font-family:"Press Start 2P",monospace;line-height:1.8}.eyebrow{font:9px/1.8 "Press Start 2P",monospace;color:#5f6c50}
 h1{font:clamp(17px,3.7vw,29px)/1.8 "Press Start 2P",monospace;margin:15px 0}.subtitle{font-size:14px;line-height:1.9}.couple{font-size:21px;font-weight:bold;margin-top:15px}
-nav{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding:13px;border-bottom:2px dashed #b9b19d;background:#fffaf0}
+nav{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;padding:13px;border-bottom:2px dashed #b9b19d;background:linear-gradient(90deg,#f8e8c9,#fffaf0,#f8e8c9)}
 button,.button{border:2px solid var(--line);background:var(--green);color:var(--ink);padding:10px 13px;font:14px "Gowun Dodum",sans-serif;font-weight:bold;box-shadow:3px 3px 0 var(--line);cursor:pointer;text-decoration:none;display:inline-block}
 button:hover,.button:hover{transform:translate(-1px,-1px)}button.secondary{background:var(--white)}button.pink{background:var(--pink)}button:disabled{opacity:.5;cursor:not-allowed}
 main{max-width:1120px;width:94%;margin:0 auto 50px}.tab{display:none;padding-top:20px}.tab.active{display:block}
@@ -35,19 +35,19 @@ label{display:block;font-weight:bold;font-size:13px;margin:13px 0 6px}input,text
 .guesttile .smallmeta{font-size:10px;color:var(--muted)}
 .adminbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.adminbar button{flex:0 0 auto}
 .adminlayout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}
-.canvaswrap{border:2px solid var(--line);background:#f4eddb;padding:8px;overflow:auto;max-height:72vh}
-#wallCanvas{display:block;width:100%;height:auto;image-rendering:pixelated;background:#fbf4df}
+.canvaswrap{border:2px solid #d5b76c;background:#242c43;padding:8px;overflow:auto;max-height:72vh;box-shadow:0 0 0 4px #fff0cf,0 8px 24px #51433155}
+#wallCanvas{display:block;width:100%;height:auto;image-rendering:pixelated;background:#242c43}
 .sidepanel{border:2px solid var(--line);background:#fffaf0;padding:13px;align-self:start}
 .listitem{display:flex;justify-content:space-between;gap:6px;align-items:center;border-top:1px dashed #b7af9e;padding:8px 0;font-size:12px}
-.listitem .miniBtns{display:flex;gap:4px}.listitem button{padding:5px 7px;font-size:11px;box-shadow:1px 1px 0 var(--line)}
+.listitem .miniBtns{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.listitem .miniBtns button.pink{background:#f2b9bd}.listitem button{padding:5px 7px;font-size:11px;box-shadow:1px 1px 0 var(--line)}
 .metrics{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.metric{background:#fff;border:1px solid var(--line);padding:8px 10px;font-size:12px}
-footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;color:var(--muted)}
+footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;color:var(--muted)}.ambient{position:fixed;z-index:-1;top:28%;left:0;right:0;text-align:center;pointer-events:none;color:#f2c9bd;font-size:25px;letter-spacing:28px;opacity:.4;animation:floathearts 8s ease-in-out infinite alternate}@keyframes floathearts{from{transform:translateY(0);opacity:.18}to{transform:translateY(-22px);opacity:.45}}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#292b27;color:white;padding:11px 15px;z-index:10;max-width:90%;font-size:13px}
-#movieStage{width:100%;background:#fbf4df;border:2px solid var(--line);display:block}
+#movieStage{width:100%;background:#242c43;border:3px solid #d5b76c;display:block;box-shadow:0 0 0 4px #fff0cf}
 @media(max-width:760px){.adminlayout{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.guestwall{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}.adminlayout .sidepanel{order:-1}}
 </style>
 </head>
-<body>
+<body><div class="ambient" aria-hidden="true">♥　✦　♡　✧　♥</div>
 <header>
  <div class="eyebrow">♥ A LITTLE NOTE, A FOREVER MEMORY ♥</div>
  <h1>OUR PIXEL<br>GUESTBOOK</h1>
@@ -96,7 +96,7 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 
 <section id="admin" class="tab">
  <div class="panel">
-  <h2>COUPLE'S CONTROL ROOM</h2><p class="lead">관리자 로그인 후 캐릭터를 자동 정렬하거나 개별 위치를 조정할 수 있습니다. 실제 배포 전에 Supabase 연결과 관리자 권한 설정이 필요합니다.</p>
+  <h2>COUPLE'S CONTROL ROOM</h2><p class="lead">관리자 로그인 후 하객 캐릭터를 자동 정렬·직접 배치하고, 원치 않는 메시지는 개별 삭제할 수 있습니다.</p>
   <div id="adminLogin"><div class="formgrid"><div><label for="adminEmail">관리자 이메일</label><input id="adminEmail" type="email" autocomplete="username"></div><div><label for="adminPassword">비밀번호</label><input id="adminPassword" type="password" autocomplete="current-password"></div></div><p><button id="loginBtn">관리자 로그인</button></p></div>
   <div id="adminControls" class="hidden">
    <div class="adminbar"><button id="autoArrange">자동 오와열 정렬</button><button id="toggleDrag" class="secondary">직접 배치 켜기</button><button id="saveLayout" class="secondary">배치 저장</button><button id="closeSubmissions" class="pink">참여 마감/열기</button><button id="logoutBtn" class="secondary">로그아웃</button></div>
@@ -123,9 +123,9 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* 배포 전 README의 안내대로 URL과 publishable/anon key를 설정하세요. secret/service_role 키는 절대 넣지 마세요. */
-const SUPABASE_URL = "https://ogblknztqowqxtbqpopq.supabase.co";
+const SUPABASE_URL="https://ogblknztqowqxtbqpopq.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_440dXjvbFBzoPheVSBAKiA_ZC0D-0p8";
-const CONFIGURED=SUPABASE_URL.startsWith("https://")&&!SUPABASE_URL.includes("YOUR_")&&!SUPABASE_ANON_KEY.includes("YOUR_");
+const CONFIGURED=SUPABASE_URL.startsWith("https://")&&!SUPABASE_URL.includes("PASTE_")&&!SUPABASE_ANON_KEY.includes("PASTE_");
 const db=CONFIGURED&&window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY):null;
 const COLORS={skin:["#f7d7b5","#e9b78c","#c98e62","#8e5b42","#f1c6a5","#b97755"],hair:["#302a2b","#67432f","#d4a34f","#e4d7c3","#b85c48","#6c78a5"],outfit:["#b9d7a8","#f2b9bd","#b9d9e9","#f6dc88","#9d91c8","#e7e2d7","#de8d64","#343c50"]};
 let guests=[],admin=false,dragEnabled=false,submissionsOpen=true,recorder=null,recordChunks=[],recordTimer=null,liveChannel=null;
@@ -147,27 +147,64 @@ function drawSprite(ctx,x,y,scale,a,outline=true){
  if(a.accessory==='bow'){px(6,3,5,3,'#d76d8b');px(11,4,3,2,'#f4d1db');px(14,3,4,3,'#d76d8b')}
  if(a.accessory==='flower'){px(22,3,3,3,'#f6dc88');px(24,5,3,3,'#f2b9bd');px(21,6,3,3,'#f2b9bd')}
  if(a.accessory==='crown'){px(10,0,3,3,'#f6dc88');px(15,0,3,3,'#f6dc88');px(20,0,3,3,'#f6dc88');px(10,2,13,2,'#d8a83e')}
- // neck, body, arms
+ // neck, body, arms. The selected character style changes silhouette/details clearly.
  px(13,16,6,3,skin);
- if(a.outfit==='suit'){px(7,19,18,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48');px(5,20,3,9,skin);px(24,20,3,9,skin)}
- else if(a.outfit==='dress'){px(8,19,16,7,cloth);px(6,25,20,7,cloth);px(5,32,22,2,cloth);px(5,20,3,9,skin);px(24,20,3,9,skin)}
- else if(a.outfit==='hoodie'){px(7,19,18,12,cloth);px(11,19,10,4,'#e9e3d7');px(5,21,3,8,skin);px(24,21,3,8,skin)}
- else if(a.outfit==='hanbok'){px(7,19,18,7,cloth);px(5,25,22,7,'#fff0d1');px(12,21,8,2,'#c46e75');px(5,20,3,8,skin);px(24,20,3,8,skin)}
- else {px(7,19,18,12,cloth);px(5,21,3,8,skin);px(24,21,3,8,skin);px(14,21,4,3,'#fff9e9')}
- px(9,31,5,6,'#4b4d49');px(18,31,5,6,'#4b4d49');px(7,37,8,2,dark);px(17,37,8,2,dark);
- if(gender==='feminine'&&a.hair==='long'){px(5,8,4,15,hair);px(23,8,4,15,hair)}
+ if(gender==='masculine'){
+   px(6,19,20,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48');
+   px(4,20,4,9,skin);px(24,20,4,9,skin);
+   px(9,31,5,6,'#41454c');px(18,31,5,6,'#41454c');
+ } else if(gender==='feminine'){
+   if(a.outfit==='suit'){px(8,19,16,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48')}
+   else if(a.outfit==='dress'){px(10,19,12,6,cloth);px(6,25,20,8,cloth);px(5,32,22,2,cloth)}
+   else if(a.outfit==='hanbok'){px(8,19,16,7,cloth);px(5,25,22,8,'#fff0d1');px(12,21,8,2,'#c46e75')}
+   else if(a.outfit==='hoodie'){px(8,19,16,12,cloth);px(11,19,10,4,'#e9e3d7')}
+   else {px(8,19,16,12,cloth);px(14,21,4,3,'#fff9e9')}
+   px(6,21,3,8,skin);px(24,21,3,8,skin);
+   px(10,31,4,6,'#4b4d49');px(18,31,4,6,'#4b4d49');
+   // Small neckline/bow accent makes feminine style visible at thumbnail size.
+   px(13,19,6,3,a.outfit==='dress'?'#f2b9bd':'#fff0d1');
+ } else {
+   if(a.outfit==='suit'){px(7,19,18,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48');px(5,20,3,9,skin);px(24,20,3,9,skin)}
+   else if(a.outfit==='dress'){px(8,19,16,7,cloth);px(6,25,20,7,cloth);px(5,32,22,2,cloth);px(5,20,3,9,skin);px(24,20,3,9,skin)}
+   else if(a.outfit==='hoodie'){px(7,19,18,12,cloth);px(11,19,10,4,'#e9e3d7');px(5,21,3,8,skin);px(24,21,3,8,skin)}
+   else if(a.outfit==='hanbok'){px(7,19,18,7,cloth);px(5,25,22,7,'#fff0d1');px(12,21,8,2,'#c46e75');px(5,20,3,8,skin);px(24,20,3,8,skin)}
+   else {px(7,19,18,12,cloth);px(5,21,3,8,skin);px(24,21,3,8,skin);px(14,21,4,3,'#fff9e9')}
+   px(9,31,5,6,'#4b4d49');px(18,31,5,6,'#4b4d49');
+ }
+ px(7,37,8,2,dark);px(17,37,8,2,dark);
+ if(gender==='feminine'){px(5,8,4,15,hair);px(23,8,4,15,hair);px(6,7,3,4,hair);px(23,7,3,4,hair)}
 }
 function drawPreview(){const c=$('avatarPreview'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.imageSmoothingEnabled=false;drawSprite(ctx,0,0,1,getAvatar());$('bubblePreview').textContent=$('message').value||'축하 메시지가 여기에 표시돼요!';$('previewName').textContent=$('guestName').value||'하객 이름'}
-['guestName','message','gender','hair','top','accessory'].forEach(id=>$(id).addEventListener('input',drawPreview));
+['guestName','message'].forEach(id=>$(id).addEventListener('input',drawPreview));
+['gender','hair','top','accessory'].forEach(id=>{ $(id).addEventListener('input',drawPreview); $(id).addEventListener('change',drawPreview); });
 function normalized(g){return {id:g.id||uid(),name:g.name||'하객',message:g.message||'',avatar:g.avatar||getAvatar(),created_at:g.created_at||new Date().toISOString(),x:g.x??null,y:g.y??null}}
 function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=32;c.height=40;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
 function canvasCtx(c){const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;return ctx}
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
- const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;ctx.fillStyle='#fbf4df';ctx.fillRect(0,0,W,H);
- // subtle pixel confetti background
+ const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
+ // Pixel-art wedding hall: dusk windows, chandeliers, flower arch, stage, aisle and candle lights.
+ ctx.fillStyle='#20283e';ctx.fillRect(0,0,W,H);
+ // tall ballroom windows
+ for(let i=0;i<8;i++){const wx=i*W/8+W/64;ctx.fillStyle='#32445e';ctx.fillRect(wx,0,W/13,H*.43);ctx.strokeStyle='#c4a66c';ctx.lineWidth=5;ctx.strokeRect(wx,0,W/13,H*.43);ctx.fillStyle='#f6dca0';for(let k=0;k<5;k++)ctx.fillRect(wx+8+(k*17)%(W/15),18+(k*31)%Math.max(30,H*.35),5,5)}
+ // ceiling garlands and warm chandeliers
+ ctx.fillStyle='#b99a5a';ctx.fillRect(0,0,W,14);ctx.fillStyle='#e5c77e';
+ for(let i=0;i<7;i++){const cx=(i+.5)*W/7;ctx.fillRect(cx-20,25,40,5);ctx.fillRect(cx-14,30,28,5);ctx.fillRect(cx-7,35,14,12);ctx.fillStyle='#fff0ba';ctx.fillRect(cx-17,38,5,10);ctx.fillRect(cx+12,38,5,10);ctx.fillStyle='#e5c77e'}
+ // stage platform and stairs
+ ctx.fillStyle='#9d7c55';ctx.fillRect(W*.25,H*.29,W*.5,H*.13);ctx.fillStyle='#e8d5a5';ctx.fillRect(W*.27,H*.31,W*.46,H*.09);ctx.fillStyle='#d4b779';ctx.fillRect(W*.22,H*.42,W*.56,H*.025);ctx.fillRect(W*.28,H*.445,W*.44,H*.025);ctx.fillRect(W*.34,H*.47,W*.32,H*.025);
+ // floral arch around couple
+ ctx.strokeStyle='#d6b86d';ctx.lineWidth=Math.max(5,W*.006);ctx.beginPath();ctx.moveTo(W*.37,H*.39);ctx.lineTo(W*.37,H*.27);ctx.quadraticCurveTo(W*.5,H*.17,W*.63,H*.27);ctx.lineTo(W*.63,H*.39);ctx.stroke();
+ for(let i=0;i<42;i++){const side=i%2,xx=side?W*.63-(i%7)*W*.006:W*.37+(i%7)*W*.006,yy=H*.23+Math.floor(i/2)*H*.004;ctx.fillStyle=['#fff0cf','#e9c5c4','#d5e2c2','#f6dfa0'][i%4];ctx.fillRect(xx+(i*13)%Math.max(1,W*.02),yy,8,8)}
+ // aisle runner and candle rows
+ ctx.fillStyle='#d5b77c';ctx.fillRect(W*.38,H*.49,W*.24,H*.51);ctx.fillStyle='#f8e8c9';ctx.fillRect(W*.40,H*.49,W*.20,H*.51);
+ for(let i=0;i<18;i++){const yy=H*.51+i*H*.027;for(const side of [-1,1]){const xx=W*.5+side*(W*.12+i*W*.003);ctx.fillStyle='#e6c982';ctx.fillRect(xx,yy,9,9);ctx.fillStyle='#fff0bb';ctx.fillRect(xx+2,yy-6,5,6)}}
+ // little sparkle confetti
  for(let i=0;i<90;i++){ctx.fillStyle=['#e8dcbf','#d7e4cb','#f1d4d0','#d5e6ee'][i%4];ctx.fillRect((i*197+47)%W,(i*113+31)%H,7,7)}
- if(showTitle){ctx.fillStyle='#30332d';ctx.textAlign='center';ctx.font='bold 35px "Gowun Dodum",sans-serif';ctx.fillText('윤성 ♥ 소미의 결혼을 축하합니다',W/2,74);ctx.font='20px "Gowun Dodum",sans-serif';ctx.fillText('OUR PIXEL GUESTBOOK · 2027.01.30',W/2,111)}
- const top=showTitle?155:35, cols=Math.max(1,Math.floor(W/150)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
+ if(showTitle){ctx.fillStyle='#fff0cf';ctx.textAlign='center';ctx.font='bold 35px "Gowun Dodum",sans-serif';ctx.fillText('윤성 ♥ 소미의 결혼을 축하합니다',W/2,64);ctx.font='20px "Gowun Dodum",sans-serif';ctx.fillText('OUR PIXEL GUESTBOOK · 2027.01.30',W/2,94)}
+ // bride and groom standing on the stage (pixel sprites)
+ drawSprite(ctx,Math.round(W*.465-24),Math.round(H*.30),1.9,{gender:'masculine',skin:'#f1c6a5',hair:'short',hairColor:'#302a2b',outfit:'suit',outfitColor:'#343c50',accessory:'none'});
+ drawSprite(ctx,Math.round(W*.535-24),Math.round(H*.30),1.9,{gender:'feminine',skin:'#f7d7b5',hair:'long',hairColor:'#67432f',outfit:'dress',outfitColor:'#fff0d1',accessory:'flower'});
+ ctx.fillStyle='#fff0cf';ctx.font='bold 17px "Gowun Dodum",sans-serif';ctx.textAlign='center';ctx.fillText('윤성 ♥ 소미',W*.5,H*.30+88);
+ const top=showTitle?Math.round(H*.53):Math.round(H*.49), cols=Math.max(1,Math.floor(W/150)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
  items.forEach((g,i)=>{
   if(active>=0 && bubbles==='sequence' && i!==active){} // still draw all avatars
   const col=i%cols,row=Math.floor(i/cols),cx=col*cellW+cellW/2,cy=top+row*cellH;
@@ -186,7 +223,7 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
 function wrapText(ctx,text,max){const out=[];let line='';for(const ch of text){if(ch==='\n'){out.push(line);line='';continue}const test=line+ch;if(ctx.measureText(test).width>max&&line){out.push(line);line=ch}else line=test}if(line||!out.length)out.push(line);return out}
 function pixelRect(ctx,x,y,w,h,fill,stroke){ctx.fillStyle=fill;ctx.fillRect(x-w/2,y,w,h);ctx.strokeStyle=stroke;ctx.strokeRect(x-w/2,y,w,h)}
 function arrange(){const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/145)),top=.19,rows=Math.ceil(guests.length/cols),cellX=1/cols,cellY=(.75/Math.max(1,rows));guests=guests.map((g,i)=>({...g,x:(i%cols+.5)*cellX,y:top+Math.floor(i/cols)*cellY}));drawScene(c,guests,{bubbles:'all'});renderAdminList()}
-function renderAdminList(){const root=$('adminGuestList');root.replaceChildren();guests.forEach((g,i)=>{const row=document.createElement('div');row.className='listitem';const label=document.createElement('span');label.textContent=`${i+1}. ${g.name}`;const btns=document.createElement('div');btns.className='miniBtns';[['↑',-1],['↓',1]].forEach(([txt,delta])=>{const b=document.createElement('button');b.textContent=txt;b.onclick=()=>{const j=i+delta;if(j<0||j>=guests.length)return;[guests[i],guests[j]]=[guests[j],guests[i]];arrange();};btns.append(b)});row.append(label,btns);root.append(row)})}
+function renderAdminList(){const root=$('adminGuestList');root.replaceChildren();guests.forEach((g,i)=>{const row=document.createElement('div');row.className='listitem';const label=document.createElement('span');label.textContent=`${i+1}. ${g.name}`;label.title=g.message||'';const btns=document.createElement('div');btns.className='miniBtns';[['↑',-1],['↓',1]].forEach(([txt,delta])=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.title=delta<0?'위로 이동':'아래로 이동';b.onclick=()=>{const j=i+delta;if(j<0||j>=guests.length)return;[guests[i],guests[j]]=[guests[j],guests[i]];arrange();};btns.append(b)});const del=document.createElement('button');del.type='button';del.textContent='삭제';del.className='pink';del.title='이 메시지 삭제';del.onclick=async()=>{if(!admin||!db){toast('관리자 로그인 후 이용해주세요.');return}if(!confirm(`'${g.name}'님의 축하 메시지를 삭제할까요? 삭제 후 복구할 수 없습니다.\n\n${g.message}`))return;del.disabled=true;const {error}=await db.from('wedding_guests').delete().eq('id',g.id);if(error){del.disabled=false;toast('삭제 실패: 관리자 권한 또는 Supabase 정책을 확인해주세요.');console.error(error);return}guests=guests.filter(item=>item.id!==g.id);renderWall();arrange();drawScene($('movieStage'),guests,{bubbles:'all'});toast('메시지를 삭제했습니다. 다른 접속자 화면에도 반영됩니다.');};btns.append(del);row.append(label,btns);root.append(row)})}
 function showTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===id));if(id==='wall')renderWall();if(id==='admin'&&admin){arrange()}if(id==='export'){drawScene($('movieStage'),guests,{bubbles:'all'})}}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function seedPreview(){guests=[normalized({id:'demo1',name:'민지',message:'두 분의 결혼을 축하해요!',avatar:{gender:'feminine',skin:COLORS.skin[1],hair:'long',hairColor:COLORS.hair[1],outfit:'dress',outfitColor:COLORS.outfit[1],accessory:'flower'}}),normalized({id:'demo2',name:'준호',message:'늘 행복하고 웃음 가득하길!',avatar:{gender:'masculine',skin:COLORS.skin[2],hair:'short',hairColor:COLORS.hair[0],outfit:'suit',outfitColor:COLORS.outfit[2],accessory:'glasses'}})];renderWall();drawScene($('movieStage'),guests,{bubbles:'all'});$('syncState').textContent='미리보기 모드'}
