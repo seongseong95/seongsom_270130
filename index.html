@@ -32,7 +32,13 @@ label{display:block;font-weight:bold;font-size:13px;margin:13px 0 6px}input,text
 .guesttile .bubble{font-size:11px;line-height:1.5;min-height:40px;overflow-wrap:anywhere;margin:0 auto 4px;max-width:100%;padding:5px;background:#fff;border:1px solid #57594f}
 .guesttile canvas{display:block;width:64px;height:80px;image-rendering:pixelated;margin:0 auto;animation:guestBob 1.8s ease-in-out infinite alternate}.guesttile:nth-child(3n) canvas{animation-delay:-.7s}.guesttile:nth-child(3n+1) canvas{animation-delay:-1.2s}@keyframes guestBob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
 .guesttile .guestname{font-weight:bold;font-size:12px;overflow-wrap:anywhere}
- .guesttile .guestname {-webkit-text-stroke: 2px #fffaf0;paint-order: stroke fill;text-shadow:1px 1px 0 #34382f,-1px -1px 0 #34382f,1px -1px 0 #34382f,-1px 1px 0 #34382f;}
+.guesttile .guestname {color: #ffffff !important;font-weight: bold;font-size: 12px;overflow-wrap: anywhere;-webkit-text-stroke: 0.6px #202020;paint-order: stroke fill;text-shadow:-2px -2px 0 #202020,0px -2px 0 #202020,     2px -2px 0 #202020,
+    -2px  0px 0 #202020,
+     2px  0px 0 #202020,
+    -2px  2px 0 #202020,
+     0px  2px 0 #202020,
+     2px  2px 0 #202020;
+}
 .guesttile .smallmeta{font-size:10px;color:var(--muted)}
 .adminbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.adminbar button{flex:0 0 auto}
 .adminlayout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}
