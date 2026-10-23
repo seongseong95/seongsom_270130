@@ -30,7 +30,10 @@ label{display:block;font-weight:bold;font-size:13px;margin:13px 0 6px}input,text
 .guesttile{min-width:0;text-align:center;padding:8px 5px 10px;border:1px solid #d8cfba;background:#fff9e8;position:relative}
 .guesttile:nth-child(3n){background:#f7e8e5}.guesttile:nth-child(3n+1){background:#eaf0e1}
 .guesttile .bubble{font-size:11px;line-height:1.5;min-height:40px;overflow-wrap:anywhere;margin:0 auto 4px;max-width:100%;padding:5px;background:#fff;border:1px solid #57594f}
-.guesttile canvas{display:block;width:64px;height:80px;image-rendering:pixelated;margin:0 auto}
+.guesttile canvas{display:block;width:64px;height:80px;image-rendering:pixelated;margin:0 auto;transform-origin:50% 85%;animation:guestIdle 1.35s steps(2,end) infinite;will-change:transform}
+.guesttile:nth-child(3n+1) canvas{animation-delay:-.42s}.guesttile:nth-child(4n+2) canvas{animation-delay:-.83s}.guesttile:nth-child(5n) canvas{animation-duration:1.7s}
+@keyframes guestIdle{0%,100%{transform:translate(0,0) rotate(0)}20%{transform:translate(-2px,-2px) rotate(-2deg)}45%{transform:translate(1px,0) rotate(1deg)}65%{transform:translate(2px,-3px) rotate(2deg)}80%{transform:translate(0,0) rotate(0)}}
+@media(prefers-reduced-motion:reduce){.guesttile canvas{animation:none}}
 .guesttile .guestname{font-weight:bold;font-size:12px;overflow-wrap:anywhere}
 .guesttile .smallmeta{font-size:10px;color:var(--muted)}
 .adminbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.adminbar button{flex:0 0 auto}
@@ -210,7 +213,7 @@ function drawPreview(){const c=$('avatarPreview'),ctx=c.getContext('2d');ctx.cle
 function normalized(g){return {id:g.id||uid(),name:g.name||'하객',message:g.message||'',avatar:g.avatar||getAvatar(),created_at:g.created_at||new Date().toISOString(),x:g.x??null,y:g.y??null}}
 function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=32;c.height=40;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
 function canvasCtx(c){const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;return ctx}
-function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true,visibleCount=items.length,fadeIndex=-1,fadeProgress=1}={}){
+function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true,visibleCount=items.length,fadeIndex=-1,fadeProgress=1,motionTime=null}={}){
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
  ctx.fillStyle='#20283e';ctx.fillRect(0,0,W,H);
  for(let i=0;i<8;i++){const wx=i*W/8+W/64;ctx.fillStyle='#32445e';ctx.fillRect(wx,0,W/13,H*.43);ctx.strokeStyle='#c4a66c';ctx.lineWidth=5;ctx.strokeRect(wx,0,W/13,H*.43);ctx.fillStyle='#f6dca0';for(let k=0;k<5;k++)ctx.fillRect(wx+8+(k*17)%(W/15),18+(k*31)%Math.max(30,H*.35),5,5)}
@@ -230,10 +233,19 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
  items.forEach((g,i)=>{
   if(i>=visibleCount)return;
   const col=i%cols,row=Math.floor(i/cols),cx=col*cellW+cellW/2,cy=top+row*cellH;
-  const x=(g.x!==null&&g.x!==undefined&&layout)?g.x*W:cx;
+  let x=(g.x!==null&&g.x!==undefined&&layout)?g.x*W:cx;
   const targetY=(g.y!==null&&g.y!==undefined&&layout)?g.y*H:cy;
   const isFading=i===fadeIndex,progress=isFading?Math.max(0,Math.min(1,fadeProgress)):1;
-  const y=targetY+(isFading?(1-progress)*18:0);
+  let y=targetY+(isFading?(1-progress)*18:0);
+  // Gentle pixel-game motion: idle sway, short walks and occasional little hops.
+  if(motionTime!==null){
+   let seed=0;for(const ch of String(g.id||i))seed=(seed*31+ch.charCodeAt(0))>>>0;
+   const phase=(motionTime/1000)+(seed%1700)/270;
+   x+=Math.sin(phase*1.25)*Math.min(5,cellW*.025);
+   y+=Math.abs(Math.sin(phase*2.0))*-2.5;
+   const hopCycle=(motionTime/1000+(seed%900)/300)%6.8;
+   if(hopCycle<.42)y-=Math.sin((hopCycle/.42)*Math.PI)*12;
+  }
   ctx.save();ctx.globalAlpha=progress;
   const showBubble=bubbles==='all'||(bubbles==='sequence'&&i===active);
   if(showBubble){ctx.font='16px "Gowun Dodum",sans-serif';const maxW=Math.min(cellW-12,200),words=(g.message||'').slice(0,180);const lines=wrapText(ctx,words,maxW-20);const bw=Math.min(maxW,Math.max(85,...lines.map(l=>ctx.measureText(l).width+22))),bh=lines.length*21+18;
@@ -361,24 +373,37 @@ $('exportVideo').onclick=async()=>{
  const sleepFrames=async(ms,draw)=>{const end=performance.now()+ms;while(!stopRequested&&performance.now()<end){const now=performance.now();draw(now);await waitFrame()}};
  try{
    if(mode==='entrance'){
-     drawScene(canvas,guests,{bubbles:'all',visibleCount:0});
-     await sleepFrames(250,()=>drawScene(canvas,guests,{bubbles:'all',visibleCount:0}));
+     drawScene(canvas,guests,{bubbles:'all',visibleCount:0,motionTime:performance.now()});
+     await sleepFrames(250,()=>drawScene(canvas,guests,{bubbles:'all',visibleCount:0,motionTime:performance.now()}));
      for(let i=0;i<guests.length&&!stopRequested;i++){
        const fadeMs=800,started=performance.now();
-       await sleepFrames(fadeMs,now=>{const p=Math.min(1,(now-started)/fadeMs);drawScene(canvas,guests,{bubbles:'all',visibleCount:i+1,fadeIndex:i,fadeProgress:p})});
-       await sleepFrames(seconds*1000,()=>drawScene(canvas,guests,{bubbles:'all',visibleCount:i+1}));
+       await sleepFrames(fadeMs,now=>{const p=Math.min(1,(now-started)/fadeMs);drawScene(canvas,guests,{bubbles:'all',visibleCount:i+1,fadeIndex:i,fadeProgress:p,motionTime:now})});
+       await sleepFrames(seconds*1000,()=>drawScene(canvas,guests,{bubbles:'all',visibleCount:i+1,motionTime:now}));
      }
-     if(!stopRequested)drawScene(canvas,guests,{bubbles:'all',visibleCount:guests.length});
+     if(!stopRequested)drawScene(canvas,guests,{bubbles:'all',visibleCount:guests.length,motionTime:performance.now()});
    }else{
      for(let i=0;i<guests.length&&!stopRequested;i++){
-       drawScene(canvas,guests,{bubbles:'sequence',active:i});
-       await sleepFrames(seconds*1000,()=>drawScene(canvas,guests,{bubbles:'sequence',active:i}));
+       drawScene(canvas,guests,{bubbles:'sequence',active:i,motionTime:performance.now()});
+       await sleepFrames(seconds*1000,()=>drawScene(canvas,guests,{bubbles:'sequence',active:i,motionTime:performance.now()}));
      }
    }
  }catch(e){console.error('영상 렌더링 실패',e);toast('영상 생성 중 오류: '+e.message)}
  finally{if(recorder&&recorder.state!=='inactive')recorder.stop()}
 };
 $('stopVideo').onclick=()=>{stopRequested=true;if(recorder&&recorder.state!=='inactive')recorder.stop()};
+// Animate canvas-based character scenes while their tabs are visible. Video export owns
+// movieStage while recording, so the preview loop pauses to preserve sequential effects.
+let lastMotionPaint=0;
+function animateCharacterScenes(now){
+ if(now-lastMotionPaint>90){
+  const activeTab=document.querySelector('.tab.active')?.id;
+  if(activeTab==='admin'&&admin&&!dragEnabled)drawScene($('wallCanvas'),guests,{bubbles:'all',motionTime:now});
+  if(activeTab==='export'&&(!recorder||recorder.state==='inactive'))drawScene($('movieStage'),guests,{bubbles:'all',motionTime:now});
+  lastMotionPaint=now;
+ }
+ requestAnimationFrame(animateCharacterScenes);
+}
+requestAnimationFrame(animateCharacterScenes);
 swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');drawPreview();
 if(db){loadGuests();db.channel('wedding-guests-live').on('postgres_changes',{event:'*',schema:'public',table:'wedding_guests'},loadGuests).subscribe();db.auth.getSession().then(async({data})=>{if(data.session){const {data:userData}=await db.auth.getUser();const {data:row}=await db.from('wedding_admins').select('user_id').eq('user_id',userData.user.id).maybeSingle();if(row){admin=true;$('adminLogin').classList.add('hidden');$('adminControls').classList.remove('hidden');if(guests.length&&guests.every(g=>g.x!==null&&g.x!==undefined&&g.y!==null&&g.y!==undefined)){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList()}else{arrange()}}}})}else seedPreview();
 </script>
