@@ -44,6 +44,12 @@ label{display:block;font-weight:bold;font-size:13px;margin:13px 0 6px}input,text
 footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;color:var(--muted)}.ambient{position:fixed;z-index:-1;top:28%;left:0;right:0;text-align:center;pointer-events:none;color:#f2c9bd;font-size:25px;letter-spacing:28px;opacity:.4;animation:floathearts 8s ease-in-out infinite alternate}@keyframes floathearts{from{transform:translateY(0);opacity:.18}to{transform:translateY(-22px);opacity:.45}}
 .toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#292b27;color:white;padding:11px 15px;z-index:10;max-width:90%;font-size:13px}
 #movieStage{width:100%;background:#242c43;border:3px solid #d5b76c;display:block;box-shadow:0 0 0 4px #fff0cf}
+.admin-summary .metric{flex:1;min-width:125px}.admin-number{font-size:18px;font-weight:bold;margin-top:5px;color:#3f5a3d}
+.admin-tools{display:grid;grid-template-columns:minmax(180px,1fr) 190px;gap:8px;align-items:end;padding:12px;border:1px dashed #b7af9e;margin:12px 0;background:#fff7e7}
+.admin-tools label{margin-top:0}.admin-actions{grid-column:1/-1;display:flex;gap:7px;flex-wrap:wrap}.admin-actions button{font-size:12px;padding:8px}
+.admin-bottom{margin-top:12px;align-items:center}.admin-bottom button{font-size:12px}
+.listitem{align-items:flex-start}.listitem .guest-select{width:auto;margin:3px 2px 0 0;flex:0 0 auto}.listitem .guest-label{flex:1;min-width:0;overflow-wrap:anywhere}.listitem .guest-label small{display:block;color:var(--muted);margin-top:3px;line-height:1.4}.listitem .miniBtns{max-width:105px}
+@media(max-width:760px){.admin-tools{grid-template-columns:1fr}.admin-actions{grid-column:1}.admin-actions button{flex:1}.admin-summary .metric{min-width:42%}}
 @media(max-width:760px){.adminlayout{grid-template-columns:1fr}.formgrid{grid-template-columns:1fr}.guestwall{grid-template-columns:repeat(auto-fill,minmax(95px,1fr))}.adminlayout .sidepanel{order:-1}}
 </style>
 </head>
@@ -99,9 +105,21 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
   <h2>COUPLE'S CONTROL ROOM</h2><p class="lead">관리자 로그인 후 하객 캐릭터를 자동 정렬·직접 배치하고, 원치 않는 메시지는 개별 삭제할 수 있습니다.</p>
   <div id="adminLogin"><div class="formgrid"><div><label for="adminEmail">관리자 이메일</label><input id="adminEmail" type="email" autocomplete="username"></div><div><label for="adminPassword">비밀번호</label><input id="adminPassword" type="password" autocomplete="current-password"></div></div><p><button id="loginBtn">관리자 로그인</button></p></div>
   <div id="adminControls" class="hidden">
+   <div class="metrics admin-summary">
+    <div class="metric"><strong>전체 참여</strong><div id="adminTotal" class="admin-number">0명</div></div>
+    <div class="metric"><strong>오늘 등록</strong><div id="adminToday" class="admin-number">0명</div></div>
+    <div class="metric"><strong>접수 상태</strong><div id="adminOpenState" class="admin-number">확인 중</div></div>
+    <div class="metric"><strong>배치 저장</strong><div id="layoutState" class="admin-number">변경 전</div></div>
+   </div>
    <div class="adminbar"><button id="autoArrange">자동 오와열 정렬</button><button id="toggleDrag" class="secondary">직접 배치 켜기</button><button id="saveLayout" class="secondary">배치 저장</button><button id="closeSubmissions" class="pink">참여 마감/열기</button><button id="logoutBtn" class="secondary">로그아웃</button></div>
    <div class="metrics"><div class="metric" id="subStatus">참여 상태: 열림</div><div class="metric">캔버스: 1920 × 1080</div></div>
-   <div class="adminlayout"><div class="canvaswrap"><canvas id="wallCanvas" width="1920" height="1080"></canvas></div><aside class="sidepanel"><strong>캐릭터 목록</strong><p class="hint">직접 배치 모드에서 캐릭터를 드래그할 수 있습니다. 자동 정렬은 화면 폭에 맞춰 배치합니다.</p><div id="adminGuestList"></div></aside></div>
+   <div class="admin-tools">
+    <div><label for="guestSearch">하객 검색</label><input id="guestSearch" type="search" placeholder="이름 또는 메시지 검색"></div>
+    <div><label for="guestSort">목록 정렬</label><select id="guestSort"><option value="oldest">등록순 (오래된 순)</option><option value="newest">최신 등록순</option><option value="name">이름순</option></select></div>
+    <div class="admin-actions"><button id="selectVisible" class="secondary">표시 항목 선택</button><button id="clearSelection" class="secondary">선택 해제</button><button id="bulkDelete" class="pink">선택 삭제 (0)</button><button id="exportCsv" class="secondary">CSV 내보내기</button></div>
+   </div>
+   <div class="adminlayout"><div class="canvaswrap"><canvas id="wallCanvas" width="1920" height="1080"></canvas></div><aside class="sidepanel"><strong>캐릭터 목록</strong><p class="hint">검색·정렬은 목록 표시만 변경합니다. 캐릭터 위치는 바뀌지 않습니다.</p><div id="adminGuestList"></div></aside></div>
+   <div class="adminbar admin-bottom"><button id="resetLayout" class="secondary">자동 배치로 초기화</button><button id="refreshAdmin" class="secondary">데이터 새로고침</button><span id="selectionStatus" class="hint">선택된 하객 0명</span></div>
   </div>
   <p class="hint">보안: 관리 권한은 Supabase Auth와 데이터베이스 정책으로 확인해야 합니다. 이 화면의 UI 표시만으로 권한이 보장되지는 않습니다.</p>
  </div>
@@ -230,12 +248,59 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
 }
 function wrapText(ctx,text,max){const out=[];let line='';for(const ch of text){if(ch==='\n'){out.push(line);line='';continue}const test=line+ch;if(ctx.measureText(test).width>max&&line){out.push(line);line=ch}else line=test}if(line||!out.length)out.push(line);return out}
 function pixelRect(ctx,x,y,w,h,fill,stroke){ctx.fillStyle=fill;ctx.fillRect(x-w/2,y,w,h);ctx.strokeStyle=stroke;ctx.strokeRect(x-w/2,y,w,h)}
-function arrange(){const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/145)),rows=Math.ceil(guests.length/cols),cellX=1/cols,firstGuestY=.52,lastGuestY=.74;guests=guests.map((g,i)=>{const row=Math.floor(i/cols),y=rows<=1?.62:firstGuestY+row*((lastGuestY-firstGuestY)/(rows-1));return {...g,x:(i%cols+.5)*cellX,y}});drawScene(c,guests,{bubbles:'all'});renderAdminList()}
-function renderAdminList(){const root=$('adminGuestList');root.replaceChildren();guests.forEach((g,i)=>{const row=document.createElement('div');row.className='listitem';const label=document.createElement('span');label.textContent=`${i+1}. ${g.name}`;label.title=g.message||'';const btns=document.createElement('div');btns.className='miniBtns';[['↑',-1],['↓',1]].forEach(([txt,delta])=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.title=delta<0?'위로 이동':'아래로 이동';b.onclick=()=>{const j=i+delta;if(j<0||j>=guests.length)return;[guests[i],guests[j]]=[guests[j],guests[i]];arrange();};btns.append(b)});const del=document.createElement('button');del.type='button';del.textContent='삭제';del.className='pink';del.title='이 메시지 삭제';del.onclick=async()=>{if(!admin||!db){toast('관리자 로그인 후 이용해주세요.');return}if(!confirm(`'${g.name}'님의 축하 메시지를 삭제할까요? 삭제 후 복구할 수 없습니다.\n\n${g.message}`))return;del.disabled=true;const {error}=await db.from('wedding_guests').delete().eq('id',g.id);if(error){del.disabled=false;toast('삭제 실패: 관리자 권한 또는 Supabase 정책을 확인해주세요.');console.error(error);return}guests=guests.filter(item=>item.id!==g.id);renderWall();arrange();drawScene($('movieStage'),guests,{bubbles:'all'});toast('메시지를 삭제했습니다. 다른 접속자 화면에도 반영됩니다.');};btns.append(del);row.append(label,btns);root.append(row)})}
+function arrange(){const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/145)),rows=Math.ceil(guests.length/cols),cellX=1/cols,firstGuestY=.52,lastGuestY=.74;guests=guests.map((g,i)=>{const row=Math.floor(i/cols),y=rows<=1?.62:firstGuestY+row*((lastGuestY-firstGuestY)/(rows-1));return {...g,x:(i%cols+.5)*cellX,y}});drawScene(c,guests,{bubbles:'all'});renderAdminList();markLayoutDirty()}
+const selectedGuestIds=new Set();
+function visibleGuests(){
+ const q=($('guestSearch')?.value||'').trim().toLocaleLowerCase('ko-KR');
+ const sort=$('guestSort')?.value||'oldest';
+ let list=guests.map((g,index)=>({...g,_originalIndex:index})).filter(g=>!q||g.name.toLocaleLowerCase('ko-KR').includes(q)||(g.message||'').toLocaleLowerCase('ko-KR').includes(q));
+ if(sort==='newest')list.sort((a,b)=>new Date(b.created_at)-new Date(a.created_at));
+ else if(sort==='name')list.sort((a,b)=>a.name.localeCompare(b.name,'ko'));
+ else list.sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+ return list;
+}
+function updateAdminDashboard(){
+ const total=guests.length;
+ const todayKey=new Date().toDateString();
+ const today=guests.filter(g=>new Date(g.created_at).toDateString()===todayKey).length;
+ if($('adminTotal'))$('adminTotal').textContent=total+'명';
+ if($('adminToday'))$('adminToday').textContent=today+'명';
+ if($('adminOpenState'))$('adminOpenState').textContent=submissionsOpen?'접수 중':'마감';
+ if($('subStatus'))$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감');
+ if($('bulkDelete'))$('bulkDelete').textContent=`선택 삭제 (${selectedGuestIds.size})`;
+ if($('selectionStatus'))$('selectionStatus').textContent=`선택된 하객 ${selectedGuestIds.size}명`;
+}
+function renderAdminList(){
+ const root=$('adminGuestList');if(!root)return;root.replaceChildren();
+ const list=visibleGuests();
+ if(!list.length){const empty=document.createElement('p');empty.className='hint';empty.textContent=guests.length?'검색 결과가 없습니다.':'아직 등록된 하객이 없습니다.';root.append(empty);updateAdminDashboard();return}
+ list.forEach((g,displayIndex)=>{
+  const row=document.createElement('div');row.className='listitem';
+  const check=document.createElement('input');check.type='checkbox';check.className='guest-select';check.checked=selectedGuestIds.has(g.id);check.setAttribute('aria-label',g.name+' 선택');
+  check.onchange=()=>{if(check.checked)selectedGuestIds.add(g.id);else selectedGuestIds.delete(g.id);updateAdminDashboard()};
+  const label=document.createElement('span');label.className='guest-label';label.textContent=`${g._originalIndex+1}. ${g.name}`;label.title=g.message||'';
+  const msg=document.createElement('small');msg.textContent=(g.message||'').slice(0,90)+(g.message&&g.message.length>90?'…':'');label.append(msg);
+  const btns=document.createElement('div');btns.className='miniBtns';
+  [['↑',-1],['↓',1]].forEach(([txt,delta])=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.title=delta<0?'위로 이동':'아래로 이동';b.onclick=()=>{const i=g._originalIndex,j=i+delta;if(j<0||j>=guests.length)return;[guests[i],guests[j]]=[guests[j],guests[i]];renderAdminList();drawScene($('wallCanvas'),guests,{bubbles:'all'});markLayoutDirty()};btns.append(b)});
+  const del=document.createElement('button');del.type='button';del.textContent='삭제';del.className='pink';del.title='이 메시지 삭제';del.onclick=async()=>{if(!admin||!db){toast('관리자 로그인 후 이용해주세요.');return}if(!confirm(`'${g.name}'님의 축하 메시지를 삭제할까요? 삭제 후 복구할 수 없습니다.\n\n${g.message}`))return;del.disabled=true;const {error}=await db.from('wedding_guests').delete().eq('id',g.id);if(error){del.disabled=false;toast('삭제 실패: 관리자 권한 또는 Supabase 정책을 확인해주세요.');console.error(error);return}guests=guests.filter(item=>item.id!==g.id);selectedGuestIds.delete(g.id);renderWall();renderAdminList();drawScene($('wallCanvas'),guests,{bubbles:'all'});drawScene($('movieStage'),guests,{bubbles:'all'});updateAdminDashboard();toast('메시지를 삭제했습니다.')};
+  btns.append(del);row.append(check,label,btns);root.append(row);
+ });
+ updateAdminDashboard();
+}
+function markLayoutDirty(){if($('layoutState'))$('layoutState').textContent='저장 필요';}
+function csvEscape(v){return '"'+String(v??'').replace(/"/g,'""')+'"'}
+function downloadAdminCsv(){
+ const rows=[['이름','축하 메시지','등록 시각','X 좌표','Y 좌표']];
+ guests.forEach(g=>rows.push([g.name,g.message,g.created_at,g.x,g.y]));
+ const csv='\ufeff'+rows.map(r=>r.map(csvEscape).join(',')).join('\r\n');
+ downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8'}),'pixel-wedding-guests.csv');
+ toast('하객 목록 CSV를 저장했습니다.');
+}
+
 function showTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===id));if(id==='wall')renderWall();if(id==='admin'&&admin){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList()}if(id==='export'){drawScene($('movieStage'),guests,{bubbles:'all'})}}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function seedPreview(){guests=[normalized({id:'demo1',name:'민지',message:'두 분의 결혼을 축하해요!',avatar:{gender:'feminine',skin:COLORS.skin[1],hair:'long',hairColor:COLORS.hair[1],outfit:'dress',outfitColor:COLORS.outfit[1],accessory:'flower'}}),normalized({id:'demo2',name:'준호',message:'늘 행복하고 웃음 가득하길!',avatar:{gender:'masculine',skin:COLORS.skin[2],hair:'short',hairColor:COLORS.hair[0],outfit:'suit',outfitColor:COLORS.outfit[2],accessory:'glasses'}})];renderWall();drawScene($('movieStage'),guests,{bubbles:'all'});$('syncState').textContent='미리보기 모드'}
-async function loadGuests(){if(!db){seedPreview();return}const settingResult=await db.from('wedding_settings').select('submissions_open').eq('id',1).maybeSingle();if(!settingResult.error&&settingResult.data){submissionsOpen=settingResult.data.submissions_open;$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감')}const {data,error}=await db.from('wedding_guests').select('id,name,message,avatar,created_at,x,y').order('created_at',{ascending:true}).limit(1000);if(error){toast('데이터를 불러오지 못했습니다. 설정을 확인해주세요.');console.error(error);return}guests=(data||[]).map(normalized);$('syncState').textContent='실시간 연결';renderWall();if(admin){if(guests.some(g=>g.x!==null&&g.x!==undefined&&g.y!==null&&g.y!==undefined)){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList()}else arrange()}drawScene($('movieStage'),guests,{bubbles:'all'})}
+async function loadGuests(){if(!db){seedPreview();return}const settingResult=await db.from('wedding_settings').select('submissions_open').eq('id',1).maybeSingle();if(!settingResult.error&&settingResult.data){submissionsOpen=settingResult.data.submissions_open;$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감')}const {data,error}=await db.from('wedding_guests').select('id,name,message,avatar,created_at,x,y').order('created_at',{ascending:true}).limit(1000);if(error){toast('데이터를 불러오지 못했습니다. 설정을 확인해주세요.');console.error(error);return}guests=(data||[]).map(normalized);$('syncState').textContent='실시간 연결';renderWall();for(const id of [...selectedGuestIds])if(!guests.some(g=>g.id===id))selectedGuestIds.delete(id);if(admin){if(guests.length&&guests.every(g=>g.x!==null&&g.x!==undefined&&g.y!==null&&g.y!==undefined)){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList()}else arrange()}updateAdminDashboard();drawScene($('movieStage'),guests,{bubbles:'all'})}
 $('guestForm').onsubmit=async e=>{e.preventDefault();if(!submissionsOpen){toast('축하 메시지 접수가 마감되었습니다.');return}const name=$('guestName').value.trim(),message=$('message').value.trim();if(!name||!message)return;if(!db){toast('미리보기 모드입니다. README 설정 후 실제 등록이 가능합니다.');return}
  const btn=$('submitBtn');btn.disabled=true;const {error}=await db.from('wedding_guests').insert({name,message,avatar:getAvatar()});btn.disabled=false;if(error){toast(error.message&&error.message.includes('submissions are closed')?'축하 메시지 접수가 마감되었습니다.':'등록에 실패했습니다. 잠시 후 다시 시도해주세요.');console.error(error);return}toast('캐릭터와 축하 메시지를 등록했어요 ♥');e.target.reset();drawPreview();await loadGuests();showTab('wall')};
 $('resetAvatar').onclick=()=>{state.skin=COLORS.skin[0];state.hair=COLORS.hair[0];state.outfit=COLORS.outfit[0];swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');$('gender').value='neutral';$('hair').value='short';$('top').value='tee';$('accessory').value='none';drawPreview()};
@@ -245,10 +310,39 @@ $('autoArrange').onclick=()=>{arrange();toast('자동 정렬 완료')};
 $('toggleDrag').onclick=()=>{dragEnabled=!dragEnabled;$('toggleDrag').textContent=dragEnabled?'직접 배치 끄기':'직접 배치 켜기';$('wallCanvas').style.cursor=dragEnabled?'grab':'default';toast(dragEnabled?'캔버스에서 캐릭터를 드래그하세요.':'직접 배치가 꺼졌습니다.')};
 let dragTarget=null;
 $('wallCanvas').addEventListener('pointerdown',e=>{if(!admin||!dragEnabled)return;const c=e.currentTarget,r=c.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*c.width,y=(e.clientY-r.top)/r.height*c.height;let best=-1,dist=1e9;guests.forEach((g,i)=>{const gx=g.x!=null?g.x*c.width:((i%Math.max(1,Math.floor(c.width/145))+.5)/Math.max(1,Math.floor(c.width/145))*c.width),gy=g.y!=null?g.y*c.height:(.19*c.height+Math.floor(i/Math.max(1,Math.floor(c.width/145)))*100);const d=(gx-x)**2+(gy-y)**2;if(d<dist){dist=d;best=i}});if(best>=0){dragTarget=best;c.setPointerCapture(e.pointerId)}});
-$('wallCanvas').addEventListener('pointermove',e=>{if(dragTarget===null)return;const c=e.currentTarget,r=c.getBoundingClientRect();guests[dragTarget].x=(e.clientX-r.left)/r.width;guests[dragTarget].y=(e.clientY-r.top)/r.height;drawScene(c,guests,{bubbles:'all'})});
+$('wallCanvas').addEventListener('pointermove',e=>{if(dragTarget===null)return;const c=e.currentTarget,r=c.getBoundingClientRect();guests[dragTarget].x=(e.clientX-r.left)/r.width;guests[dragTarget].y=(e.clientY-r.top)/r.height;drawScene(c,guests,{bubbles:'all'});markLayoutDirty()});
 $('wallCanvas').addEventListener('pointerup',()=>{dragTarget=null});
-$('saveLayout').onclick=async()=>{if(!db||!admin){toast('관리자 로그인과 데이터베이스 연결이 필요합니다.');return}const btn=$('saveLayout');btn.disabled=true;try{for(const g of guests){if(!g.id||String(g.id).startsWith('demo'))continue;const {data,error}=await db.from('wedding_guests').update({x:g.x,y:g.y}).eq('id',g.id).select('id');if(error)throw error;if(!data||data.length===0)throw new Error('좌표가 저장되지 않았습니다. 관리자 UPDATE 정책을 확인해주세요.')}toast('배치를 저장했습니다. 새로고침해도 위치가 유지됩니다.')}catch(e){console.error('배치 저장 실패',e);toast('배치 저장 실패: '+(e.message||'Supabase 정책을 확인해주세요.'))}finally{btn.disabled=false}};
-$('closeSubmissions').onclick=async()=>{if(!db||!admin){toast('관리자 로그인과 데이터베이스 연결이 필요합니다.');return}const btn=$('closeSubmissions'),nextState=!submissionsOpen;btn.disabled=true;try{const {data:existing,error:readError}=await db.from('wedding_settings').select('id').eq('id',1).maybeSingle();if(readError)throw readError;let result;if(existing){result=await db.from('wedding_settings').update({submissions_open:nextState}).eq('id',1).select('id')}else{result=await db.from('wedding_settings').insert({id:1,submissions_open:nextState}).select('id')}if(result.error)throw result.error;if(existing&&(!result.data||result.data.length===0))throw new Error('설정 행을 수정할 수 없습니다. wedding_settings UPDATE 정책을 확인해주세요.');submissionsOpen=nextState;$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감');toast(submissionsOpen?'참여를 다시 열었습니다.':'참여를 마감했습니다.')}catch(e){console.error('참여 상태 변경 실패',e);toast('참여 상태 변경 실패: '+(e.message||'Supabase 정책을 확인해주세요.'))}finally{btn.disabled=false}};
+$('saveLayout').onclick=async()=>{if(!db||!admin){toast('관리자 로그인과 데이터베이스 연결이 필요합니다.');return}const btn=$('saveLayout');btn.disabled=true;try{for(const g of guests){if(!g.id||String(g.id).startsWith('demo'))continue;const {data,error}=await db.from('wedding_guests').update({x:g.x,y:g.y}).eq('id',g.id).select('id');if(error)throw error;if(!data||data.length===0)throw new Error('좌표가 저장되지 않았습니다. 관리자 UPDATE 정책을 확인해주세요.')}if($('layoutState'))$('layoutState').textContent='저장됨';toast('배치를 저장했습니다. 새로고침해도 위치가 유지됩니다.')}catch(e){console.error('배치 저장 실패',e);toast('배치 저장 실패: '+(e.message||'Supabase 정책을 확인해주세요.'))}finally{btn.disabled=false}};
+$('closeSubmissions').onclick=async()=>{if(!db||!admin){toast('관리자 로그인과 데이터베이스 연결이 필요합니다.');return}const btn=$('closeSubmissions'),nextState=!submissionsOpen;btn.disabled=true;try{const {data:existing,error:readError}=await db.from('wedding_settings').select('id').eq('id',1).maybeSingle();if(readError)throw readError;let result;if(existing){result=await db.from('wedding_settings').update({submissions_open:nextState}).eq('id',1).select('id')}else{result=await db.from('wedding_settings').insert({id:1,submissions_open:nextState}).select('id')}if(result.error)throw result.error;if(existing&&(!result.data||result.data.length===0))throw new Error('설정 행을 수정할 수 없습니다. wedding_settings UPDATE 정책을 확인해주세요.');submissionsOpen=nextState;$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감');updateAdminDashboard();toast(submissionsOpen?'참여를 다시 열었습니다.':'참여를 마감했습니다.')}catch(e){console.error('참여 상태 변경 실패',e);toast('참여 상태 변경 실패: '+(e.message||'Supabase 정책을 확인해주세요.'))}finally{btn.disabled=false}};
+$('guestSearch').addEventListener('input',renderAdminList);
+$('guestSort').addEventListener('change',renderAdminList);
+$('selectVisible').onclick=()=>{visibleGuests().forEach(g=>selectedGuestIds.add(g.id));renderAdminList()};
+$('clearSelection').onclick=()=>{selectedGuestIds.clear();renderAdminList()};
+$('bulkDelete').onclick=async()=>{
+ if(!admin||!db){toast('관리자 로그인과 데이터베이스 연결이 필요합니다.');return}
+ const targets=guests.filter(g=>selectedGuestIds.has(g.id)&&!String(g.id).startsWith('demo'));
+ if(!targets.length){toast('삭제할 하객을 먼저 선택해주세요.');return}
+ if(!confirm(`선택한 ${targets.length}명의 하객 메시지를 삭제할까요? 삭제 후 복구할 수 없습니다.`))return;
+ const btn=$('bulkDelete');btn.disabled=true;
+ try{
+  for(const g of targets){const {error}=await db.from('wedding_guests').delete().eq('id',g.id);if(error)throw error}
+  const ids=new Set(targets.map(g=>g.id));guests=guests.filter(g=>!ids.has(g.id));targets.forEach(g=>selectedGuestIds.delete(g.id));
+  renderWall();renderAdminList();drawScene($('wallCanvas'),guests,{bubbles:'all'});drawScene($('movieStage'),guests,{bubbles:'all'});updateAdminDashboard();toast(`${targets.length}명 삭제 완료`);
+ }catch(e){console.error('일괄 삭제 실패',e);toast('일부 삭제에 실패했습니다. 목록을 새로고침해 실제 상태를 확인해주세요.');await loadGuests()}
+ finally{btn.disabled=false}
+};
+$('exportCsv').onclick=downloadAdminCsv;
+$('refreshAdmin').onclick=async()=>{await loadGuests();toast('데이터를 새로고침했습니다.')};
+$('resetLayout').onclick=async()=>{
+ if(!admin||!db){toast('관리자 로그인과 데이터베이스 연결이 필요합니다.');return}
+ if(!confirm('모든 하객 위치를 자동 배치로 초기화하고 저장할까요?'))return;
+ arrange();
+ const btn=$('resetLayout');btn.disabled=true;
+ try{for(const g of guests){const {error}=await db.from('wedding_guests').update({x:g.x,y:g.y}).eq('id',g.id);if(error)throw error}
+ if($('layoutState'))$('layoutState').textContent='저장됨';toast('자동 배치 초기화 및 저장 완료');
+ }catch(e){console.error(e);toast('배치 저장 실패: Supabase UPDATE 정책을 확인해주세요.');markLayoutDirty()}
+ finally{btn.disabled=false}
+};
 $('exportPng').onclick=()=>{drawScene($('movieStage'),guests,{bubbles:'all'});$('movieStage').toBlob(blob=>{if(!blob){toast('이미지 저장 실패');return}downloadBlob(blob,'pixel-wedding-guestbook.png')})};
 function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
 let stopRequested=false;
