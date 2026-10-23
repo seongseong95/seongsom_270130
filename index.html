@@ -175,7 +175,7 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
   const y=(g.y!==null&&g.y!==undefined&&layout)?g.y*H:cy;
   const showBubble=bubbles==='all'||(bubbles==='sequence'&&i===active);
   if(showBubble){ctx.font='16px "Gowun Dodum",sans-serif';const maxW=Math.min(cellW-12,200),words=(g.message||'').slice(0,180);const lines=wrapText(ctx,words,maxW-20);const bw=Math.min(maxW,Math.max(85,...lines.map(l=>ctx.measureText(l).width+22))),bh=lines.length*21+18;
-   ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.lineWidth=3;pixelRect(ctx,x-bw/2,y-22-bh,bw,bh,'#fffdf8','#34382f');ctx.fillStyle='#30332d';ctx.textAlign='center';lines.slice(0,5).forEach((line,j)=>ctx.fillText(line,x,y-22-bh+24+j*21,bw-12));
+   ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.lineWidth=3;pixelRect(ctx,x,y-22-bh,bw,bh,'#fffdf8','#34382f');ctx.fillStyle='#30332d';ctx.textAlign='center';lines.slice(0,5).forEach((line,j)=>ctx.fillText(line,x,y-22-bh+24+j*21,bw-12));
    ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.beginPath();ctx.moveTo(x-5,y-22);ctx.lineTo(x+8,y-22);ctx.lineTo(x+1,y-12);ctx.closePath();ctx.fill();ctx.stroke();
   }
   drawSprite(ctx,Math.round(x-24),Math.round(y),1.5,g.avatar);
