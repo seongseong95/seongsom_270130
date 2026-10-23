@@ -27,7 +27,7 @@ label{display:block;font-weight:bold;font-size:13px;margin:13px 0 6px}input,text
 .previewbubble:after{content:"";position:absolute;left:20px;bottom:-9px;width:14px;height:8px;background:#fff;border-bottom:2px solid var(--line);border-left:2px solid var(--line);transform:skewY(-28deg)}
 .hint{font-size:12px;color:var(--muted);line-height:1.7}.status{font-size:12px;color:#4c6847}.hidden{display:none!important}
 .guestwall{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:12px;align-items:start}
-.guesttile{min-width:0;text-align:center;padding:8px 5px 10px;border:1px solid #d8cfba;background:#fff9e8;position:relative}
+.guesttile{min-width:0;text-align:center;padding:8px 5px 10px;border:1px solid #d8cfba;background:#fff9e8;position:relative;cursor:pointer;transition:transform .18s,box-shadow .18s}.guesttile:hover,.guesttile:focus-visible{transform:translateY(-3px);box-shadow:3px 4px 0 #34382f;outline:2px solid #d5b76c;outline-offset:1px}
 .guesttile:nth-child(3n){background:#f7e8e5}.guesttile:nth-child(3n+1){background:#eaf0e1}
 .guesttile .bubble{font-size:11px;line-height:1.5;min-height:40px;overflow-wrap:anywhere;margin:0 auto 4px;max-width:100%;padding:5px;background:#fff;border:1px solid #57594f}
 .guesttile canvas{display:block;width:64px;height:80px;image-rendering:pixelated;margin:0 auto;animation:guestBob 1.8s ease-in-out infinite alternate}.guesttile:nth-child(3n) canvas{animation-delay:-.7s}.guesttile:nth-child(3n+1) canvas{animation-delay:-1.2s}@keyframes guestBob{from{transform:translateY(0)}to{transform:translateY(-5px)}}
@@ -40,6 +40,8 @@ label{display:block;font-weight:bold;font-size:13px;margin:13px 0 6px}input,text
      2px  2px 0 #202020;
 }
 .guesttile .smallmeta{font-size:10px;color:var(--muted)}
+.guestwall-toolbar{display:grid;grid-template-columns:1fr auto;gap:10px;margin:12px 0}.guestwall-toolbar input{min-width:0}.guesttile .bubble{cursor:pointer}.guest-modal{position:fixed;inset:0;z-index:100;background:#151a25cc;display:flex;align-items:center;justify-content:center;padding:18px}.guest-modal-card{width:min(440px,100%);background:#fffaf0;border:3px solid #34382f;box-shadow:6px 6px 0 #d5b76c;padding:20px;text-align:center;position:relative;animation:modalPop .22s ease-out}.guest-modal-card .modal-message{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.8;padding:14px;background:#fff;border:2px solid #34382f;margin:12px 0}.guest-modal-card canvas{width:96px;height:120px;image-rendering:pixelated}.guest-modal-close{position:absolute;right:8px;top:8px;background:#fff}.heart-pop{position:fixed;z-index:101;pointer-events:none;font-size:28px;animation:heartRise .9s ease-out forwards}@keyframes heartRise{from{opacity:1;transform:translateY(0) scale(.6)}to{opacity:0;transform:translateY(-90px) scale(1.5)}}@keyframes modalPop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}.admin-tools input[type=file]{flex:1 1 220px}.backup-panel{border:1px dashed #b7af9e;padding:12px;margin:12px 0;background:#fffdf7}.backup-panel code{overflow-wrap:anywhere}
+@media(max-width:520px){header{padding:32px 12px 25px}.couple{font-size:19px}nav{position:sticky;top:0;z-index:20;padding:8px;background:#fffaf0ee;backdrop-filter:blur(8px)}nav button{flex:1 1 calc(50% - 8px);padding:10px 7px;font-size:13px}main{width:94%}.panel{padding:13px}.guestwall-toolbar{grid-template-columns:1fr}.guestwall{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.guesttile{padding:7px 4px}.guesttile .bubble{font-size:11px}.adminbar button,.admin-tools button{flex:1 1 calc(50% - 8px)}}
 .adminbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px}.adminbar button{flex:0 0 auto}
 .adminlayout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:14px}
 .canvaswrap{border:2px solid #d5b76c;background:#242c43;padding:8px;overflow:auto;max-height:72vh;box-shadow:0 0 0 4px #fff0cf,0 8px 24px #51433155}
@@ -100,7 +102,7 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
     <div><label for="message">축하 메시지 *</label><textarea id="message" maxlength="180" required placeholder="두 분의 결혼을 진심으로 축하해요!"></textarea></div>
    </div>
    <div class="previewbox"><canvas id="avatarPreview" class="avatarcanvas" width="32" height="40" aria-label="캐릭터 미리보기"></canvas><div><div class="previewbubble" id="bubblePreview">축하 메시지가 여기에 표시돼요!</div><p id="previewName" style="font-weight:bold;text-align:center">하객 이름</p></div></div>
-   <p class="hint">※ 한 사람당 한 캐릭터를 권장합니다. 링크를 가진 사람은 메시지와 캐릭터를 볼 수 있습니다. 실제 서비스에서는 중복 참여 방지와 신고·관리 기능을 운영하세요.</p>
+<p class="hint">※ 한 사람당 한 캐릭터를 권장합니다. 링크를 가진 사람은 메시지와 캐릭터를 볼 수 있습니다. 실제 서비스에서는 중복 참여 방지와 신고·관리 기능을 운영하세요.</p>
    <div class="row"><button type="submit" id="submitBtn">캐릭터와 메시지 등록</button><button type="button" class="pink" id="resetAvatar">캐릭터 다시 꾸미기</button></div>
   </form>
  </div>
@@ -108,7 +110,7 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 </section>
 
 <section id="wall" class="tab">
- <div class="panel"><h2>ALL OUR LOVELY GUESTS</h2><p class="lead">모든 하객의 캐릭터가 모이는 축하 월입니다. 새 메시지는 실시간으로 반영됩니다.</p><div class="metrics"><div class="metric" id="guestCount">참여 0명</div><div class="metric" id="syncState">연결 확인 중</div></div><div id="guestWall" class="guestwall"></div></div>
+ <div class="panel"><h2>ALL OUR LOVELY GUESTS</h2><p class="lead">모든 하객의 캐릭터가 모이는 축하 월입니다. 새 메시지는 실시간으로 반영됩니다.</p><div class="metrics"><div class="metric" id="guestCount">참여 0명</div><div class="metric" id="syncState">연결 확인 중</div></div><div class="guestwall-toolbar"><input id="wallSearch" type="search" placeholder="하객 이름 또는 축하 메시지 검색" aria-label="하객 검색"><button id="wallSearchClear" type="button" class="secondary">검색 지우기</button></div><div id="guestWall" class="guestwall"></div></div>
 </section>
 
 <section id="admin" class="tab">
@@ -119,6 +121,8 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
    <div class="adminbar"><button id="autoArrange">자동 오와열 정렬</button><button id="toggleDrag" class="secondary">직접 배치 켜기</button><button id="saveLayout" class="secondary">배치 저장</button><button id="closeSubmissions" class="pink">참여 마감/열기</button><button id="logoutBtn" class="secondary">로그아웃</button></div>
    <div class="metrics adminmetrics"><div class="metric" id="adminTotal">전체 하객: 0명</div><div class="metric" id="adminToday">오늘 등록: 0명</div><div class="metric" id="subStatus">참여 상태: 열림</div><div class="metric" id="layoutState">배치 상태: 저장됨</div></div>
    <div class="admin-tools"><input id="guestSearch" type="search" placeholder="이름 또는 축하 메시지 검색" aria-label="하객 검색"><select id="guestSort" aria-label="하객 정렬"><option value="created_asc">오래된 순</option><option value="created_desc">최신 등록순</option><option value="name_asc">이름순</option></select><button id="refreshAdmin" class="secondary">데이터 새로고침</button><button id="resetLayout" class="secondary">자동 배치로 초기화</button><button id="selectVisible" class="secondary">표시 항목 전체 선택</button><button id="clearSelection" class="secondary">선택 해제</button><button id="bulkDelete" class="pink">선택 항목 삭제</button><button id="exportCsv" class="secondary">CSV 내보내기</button></div>
+   <div class="backup-panel"><strong>데이터 백업·복원</strong><p class="hint">JSON 백업은 하객 이름, 메시지, 캐릭터, 위치를 보관합니다. 복원은 기존 데이터를 삭제하지 않고 같은 ID를 갱신하거나 새 ID를 추가합니다.</p><div class="row"><button type="button" id="exportJson" class="secondary">JSON 백업 저장</button><label class="button" for="importJson" style="margin:0;text-align:center">JSON 백업 복원</label><input id="importJson" type="file" accept="application/json,.json" class="hidden"></div><p class="hint">관리자 권한 관리는 Supabase SQL Editor에서 수행하세요. 아래 버튼으로 새 관리자 등록용 SQL을 확인할 수 있습니다.</p><button type="button" id="showAdminSql" class="secondary">관리자 등록 SQL 보기</button><pre id="adminSqlBox" class="hidden" style="white-space:pre-wrap;overflow-wrap:anywhere;background:#f0e7d1;padding:10px">-- 새 관리자가 Supabase Authentication → Users에 먼저 가입한 뒤 실행
+INSERT INTO public.wedding_admins (user_id) VALUES ('여기에_새_관리자의_User_ID');</pre></div>
    <p id="selectionStatus" class="hint">선택된 하객: 0명</p>
    <div class="adminlayout"><div class="canvaswrap"><canvas id="wallCanvas" width="1920" height="1080"></canvas></div><aside class="sidepanel"><strong>캐릭터 목록</strong><p class="hint">직접 배치 모드에서 드래그한 뒤 ‘배치 저장’을 누르세요. 저장은 현재 위치를 저장하며 자동 정렬하지 않습니다.</p><div id="adminGuestList"></div></aside></div>
   </div>
@@ -128,11 +132,11 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 
 <section id="export" class="tab">
  <div class="panel">
-  <h2>영상 확인하기</h2><p class="lead">하객 캐릭터와 축하 메시지를 확인할 수 있습니다.</p>
+  <h2>영상 확인하기</h2><p class="lead">하객 캐릭터와 축하 메시지를 확인하고, 전체 이미지·엔딩 화면·영상으로 저장할 수 있습니다.</p>
   <div id="exportControls" class="hidden" aria-label="관리자 영상 및 이미지 도구">
    <div class="formgrid"><div><label for="exportMode">영상 연출</label><select id="exportMode"><option value="bubble">말풍선 순차 전환</option><option value="entrance">캐릭터와 말풍선 순차 등장</option></select></div><div><label for="duration">메시지당 표시 시간</label><select id="duration"><option value="2">2초</option><option value="3" selected>3초</option><option value="4">4초</option><option value="5">5초</option></select></div></div>
    <p class="hint">PNG는 전체 캐릭터를 한 화면에 배치합니다. 영상은 브라우저에서 WebM으로 저장됩니다. MP4가 필요하면 편집 프로그램에서 변환하세요.</p>
-   <div class="row"><button id="exportPng">전체 정지 이미지 저장 (PNG)</button><button id="exportVideo">애니메이션 영상 녹화 (WebM)</button><button id="stopVideo" class="pink" disabled>녹화 중지</button><button id="fullscreenStage" class="secondary">전체 화면 보기</button></div>
+   <div class="row"><button id="exportPng">전체 정지 이미지 저장 (PNG)</button><button id="exportEnding" class="secondary">엔딩 화면 이미지 저장</button><button id="exportVideo">애니메이션 영상 녹화 (WebM)</button><button id="stopVideo" class="pink" disabled>녹화 중지</button><button id="fullscreenStage" class="secondary">전체 화면 보기</button></div>
    <p id="exportStatus" class="hint">관리자 로그인 후 이미지 저장 및 영상 제작 기능을 사용할 수 있습니다.</p>
   </div>
   <canvas id="movieStage" width="1920" height="1080" aria-label="픽셀 웨딩 방명록 미리보기"></canvas>
@@ -141,6 +145,8 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 </main>
 <footer>MADE WITH LOVE · YOONSEONG ♥ SOMI<br>Pixel Wedding Guestbook · 16-bit inspired</footer>
 <div id="toast" class="toast hidden" role="status"></div>
+<div id="guestModal" class="guest-modal hidden" role="dialog" aria-modal="true" aria-labelledby="modalGuestName"><div class="guest-modal-card"><button type="button" id="closeGuestModal" class="guest-modal-close secondary" aria-label="닫기">✕</button><canvas id="modalAvatar" width="32" height="40"></canvas><h2 id="modalGuestName" style="font: bold 20px 'Gowun Dodum',sans-serif;margin:8px 0"></h2><div id="modalMessage" class="modal-message"></div><p id="modalDate" class="hint"></p><button type="button" id="modalHeart">하트 보내기 ♥</button></div></div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 /* 배포 전 README의 안내대로 URL과 publishable/anon key를 설정하세요. secret/service_role 키는 절대 넣지 마세요. */
@@ -211,7 +217,9 @@ function drawPreview(){const c=$('avatarPreview'),ctx=c.getContext('2d');ctx.cle
 ['guestName','message'].forEach(id=>$(id).addEventListener('input',drawPreview));
 ['gender','hair','top','accessory'].forEach(id=>{ $(id).addEventListener('input',drawPreview); $(id).addEventListener('change',drawPreview); });
 function normalized(g){return {id:g.id||uid(),name:g.name||'하객',message:g.message||'',avatar:g.avatar||getAvatar(),created_at:g.created_at||new Date().toISOString(),x:g.x??null,y:g.y??null}}
-function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=32;c.height=40;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
+function renderWall(){const root=$('guestWall');root.replaceChildren();const q=($('wallSearch')?.value||'').trim().toLocaleLowerCase();const shown=guests.filter(g=>!q||`${g.name||''} ${g.message||''}`.toLocaleLowerCase().includes(q));$('guestCount').textContent=`참여 ${guests.length}명 · 표시 ${shown.length}명`;shown.forEach(g=>{const tile=document.createElement('button');tile.type='button';tile.className='guesttile';tile.style.color='inherit';tile.style.font='inherit';tile.style.boxShadow='none';tile.style.width='100%';tile.style.textAlign='center';tile.setAttribute('aria-label',`${g.name}님의 축하 메시지 보기`);const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=32;c.height=40;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);tile.onclick=()=>openGuestModal(g,tile);root.append(tile)})}
+function openGuestModal(g,source){$('modalGuestName').textContent=g.name||'하객';$('modalMessage').textContent=g.message||'축하 메시지가 없습니다.';$('modalDate').textContent=g.created_at?new Date(g.created_at).toLocaleDateString('ko-KR')+'에 남겨주셨어요':'소중한 축하 메시지';const c=$('modalAvatar'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.imageSmoothingEnabled=false;drawSprite(ctx,0,0,1,g.avatar);$('modalHeart').onclick=()=>{const r=source?.getBoundingClientRect();const h=document.createElement('span');h.className='heart-pop';h.textContent=['♥','♡','💗','✦'][Math.floor(Math.random()*4)];h.style.left=((r?r.left+r.width/2:innerWidth/2)-12)+'px';h.style.top=((r?r.top:innerHeight/2)-4)+'px';document.body.append(h);setTimeout(()=>h.remove(),1000)};$('guestModal').classList.remove('hidden')}
+function closeGuestModal(){$('guestModal').classList.add('hidden')}
 function canvasCtx(c){const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;return ctx}
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
@@ -236,16 +244,7 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
  // Static bride and groom on the stage. The five experimental action animations have been removed.
  drawSprite(ctx,Math.round(W*.465-24),Math.round(H*.30),1.9,{gender:'masculine',skin:'#f1c6a5',hair:'short',hairColor:'#302a2b',outfit:'suit',outfitColor:'#343c50',accessory:'none'});
  drawSprite(ctx,Math.round(W*.535-24),Math.round(H*.30),1.9,{gender:'feminine',skin:'#f7d7b5',hair:'long',hairColor:'#67432f',outfit:'dress',outfitColor:'#fff0d1',accessory:'flower'});
-
-ctx.textAlign = 'center';
-ctx.font = 'bold 20px "Gowun Dodum", sans-serif';
-ctx.lineJoin = 'round';
-ctx.lineWidth = 6;
-ctx.strokeStyle = '#202020';
-ctx.strokeText('윤성 ♥ 소미', W * 0.5, H * 0.30 + 88);
-ctx.fillStyle = '#ffffff';
-ctx.fillText('윤성 ♥ 소미', W * 0.5, H * 0.30 + 88);
-
+ ctx.textAlign='center';ctx.font='bold 20px "Gowun Dodum",sans-serif';ctx.lineJoin='round';ctx.lineWidth=6;ctx.strokeStyle='#202020';ctx.strokeText('윤성 ♥ 소미',W*.5,H*.30+88);ctx.fillStyle='#ffffff';ctx.fillText('윤성 ♥ 소미',W*.5,H*.30+88);
  const top=showTitle?Math.round(H*.53):Math.round(H*.49), cols=Math.max(1,Math.floor(W/150)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
  items.forEach((g,i)=>{
   if(active>=0 && bubbles==='sequence' && i!==active){} // still draw all avatars
@@ -271,17 +270,11 @@ ctx.fillText('윤성 ♥ 소미', W * 0.5, H * 0.30 + 88);
   ctx.rotate(walkLean);
   drawSprite(ctx,-36, -30,1.5,g.avatar);
   ctx.restore();
-  ctx.textAlign='center';ctx.fillStyle='#30332d';ctx.font='bold 16px "Gowun Dodum",sans-serif';ctx.textAlign = 'center';
-ctx.font = 'bold 20px "Gowun Dodum", sans-serif';
-ctx.lineJoin = 'round';
-ctx.lineWidth = 6;
-ctx.strokeStyle = '#202020';
-ctx.strokeText(g.name, x, y + 72, cellW - 10);
-ctx.fillStyle = '#ffffff';
-ctx.fillText(g.name, x, y + 72, cellW - 10);
+  ctx.textAlign='center';ctx.font='bold 20px "Gowun Dodum",sans-serif';ctx.lineJoin='round';ctx.lineWidth=5;ctx.strokeStyle='#202020';ctx.strokeText(g.name,x,y+72,cellW-10);ctx.fillStyle='#ffffff';ctx.fillText(g.name,x,y+72,cellW-10);
  });
  if(showTitle){ctx.fillStyle='#30332d';ctx.textAlign='center';ctx.font='16px "Gowun Dodum",sans-serif';ctx.fillText(`${items.length}명의 마음이 함께합니다`,W/2,H-22)}
 }
+function drawEndingScene(canvas){const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;ctx.fillStyle='#20283e';ctx.fillRect(0,0,W,H);for(let i=0;i<180;i++){ctx.fillStyle=['#f6dc88','#f2b9bd','#b9d9e9','#fffdf7'][i%4];const x=(i*193+31)%W,y=(i*127+17)%H;ctx.fillRect(x,y,5+(i%3)*2,5+(i%3)*2)}ctx.textAlign='center';ctx.lineJoin='round';ctx.font='bold 54px "Gowun Dodum",sans-serif';ctx.lineWidth=8;ctx.strokeStyle='#202020';ctx.strokeText('윤성 ♥ 소미',W/2,H*.38);ctx.fillStyle='#ffffff';ctx.fillText('윤성 ♥ 소미',W/2,H*.38);ctx.font='bold 34px "Gowun Dodum",sans-serif';ctx.lineWidth=6;ctx.strokeText('결혼을 축하합니다!',W/2,H*.52);ctx.fillStyle='#fff0cf';ctx.fillText('결혼을 축하합니다!',W/2,H*.52);ctx.font='22px "Gowun Dodum",sans-serif';ctx.fillStyle='#ffffff';ctx.fillText('2027. 01. 30 · OUR PIXEL GUESTBOOK',W/2,H*.62);ctx.font='20px "Gowun Dodum",sans-serif';ctx.fillText(`${guests.length}명의 소중한 마음과 함께`,W/2,H*.72);ctx.font='18px "Gowun Dodum",sans-serif';ctx.fillText('FOREVER STARTS HERE ♥',W/2,H*.83)}
 function wrapText(ctx,text,max){const out=[];let line='';for(const ch of text){if(ch==='\n'){out.push(line);line='';continue}const test=line+ch;if(ctx.measureText(test).width>max&&line){out.push(line);line=ch}else line=test}if(line||!out.length)out.push(line);return out}
 function pixelRect(ctx,x,y,w,h,fill,stroke){ctx.fillStyle=fill;ctx.fillRect(x-w/2,y,w,h);ctx.strokeStyle=stroke;ctx.strokeRect(x-w/2,y,w,h)}
 let selectedGuestIds=new Set();
@@ -304,6 +297,13 @@ function visibleGuests(){const q=($('guestSearch')?.value||'').trim().toLocaleLo
 function renderAdminList(){const root=$('adminGuestList');if(!root)return;root.replaceChildren();const shown=visibleGuests();shown.forEach(g=>{const i=guests.findIndex(x=>x.id===g.id);const row=document.createElement('div');row.className='listitem';const label=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.checked=selectedGuestIds.has(String(g.id));cb.setAttribute('aria-label',`${g.name} 선택`);cb.onchange=()=>{if(cb.checked)selectedGuestIds.add(String(g.id));else selectedGuestIds.delete(String(g.id));updateSelectionStatus()};const desc=document.createElement('span');desc.className='guestlabel';desc.textContent=`${i+1}. ${g.name}`;const time=document.createElement('small');time.className='smallmeta';time.textContent=g.created_at?new Date(g.created_at).toLocaleString('ko-KR'):'등록 시간 없음';desc.append(document.createElement('br'),time);desc.title=g.message||'';label.append(cb,desc);const btns=document.createElement('div');btns.className='miniBtns';[['↑',-1],['↓',1]].forEach(([txt,delta])=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.title=delta<0?'목록 순서 위로':'목록 순서 아래로';b.onclick=()=>{const j=i+delta;if(j<0||j>=guests.length)return;[guests[i],guests[j]]=[guests[j],guests[i]];markLayoutDirty();drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList()};btns.append(b)});const del=document.createElement('button');del.type='button';del.textContent='삭제';del.className='pink';del.title='이 메시지 삭제';del.onclick=async()=>{if(!admin||!db){toast('관리자 로그인 후 이용해주세요.');return}if(!confirm(`'${g.name}'님의 축하 메시지를 삭제할까요? 삭제 후 복구할 수 없습니다.\n\n${g.message}`))return;del.disabled=true;const {error}=await db.from('wedding_guests').delete().eq('id',g.id);if(error){del.disabled=false;toast('삭제 실패: 관리자 권한 또는 Supabase 정책을 확인해주세요.');console.error(error);return}guests=guests.filter(item=>item.id!==g.id);selectedGuestIds.delete(String(g.id));renderWall();drawScene($('wallCanvas'),guests,{bubbles:'all'});drawScene($('movieStage'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard();toast('메시지를 삭제했습니다. 다른 접속자 화면에도 반영됩니다.');};btns.append(del);row.append(label,btns);root.append(row)});updateSelectionStatus();updateAdminDashboard()}
 function updateSelectionStatus(){const el=$('selectionStatus');if(el)el.textContent=`선택된 하객: ${selectedGuestIds.size}명`}
 function saveCsv(){const rows=[['이름','축하 메시지','등록 시간','X','Y'],...guests.map(g=>[g.name,g.message,g.created_at,g.x,g.y])];const csv='\ufeff'+rows.map(row=>row.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8;'}),'pixel-wedding-guests.csv')}
+function saveJson(){const payload={format:'pixel-wedding-guestbook-backup',version:1,exported_at:new Date().toISOString(),guests:guests.map(g=>({id:g.id,name:g.name,message:g.message,avatar:g.avatar,created_at:g.created_at,x:g.x,y:g.y}))};downloadBlob(new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'}),'pixel-wedding-guestbook-backup.json')}
+$('exportJson').onclick=()=>{if(!admin){toast('관리자 로그인 후 이용해주세요.');return}saveJson();toast('JSON 백업 파일을 저장했습니다.')};
+$('importJson').onchange=async e=>{const file=e.target.files?.[0];e.target.value='';if(!file)return;if(!admin||!db){toast('관리자 로그인 후 이용해주세요.');return}try{const payload=JSON.parse(await file.text());const rows=Array.isArray(payload)?payload:payload.guests;if(!Array.isArray(rows)||!rows.length)throw new Error('백업 파일에서 하객 목록을 찾을 수 없습니다.');const clean=rows.map(g=>({id:g.id||uid(),name:String(g.name||'하객').slice(0,100),message:String(g.message||'').slice(0,1000),avatar:g.avatar||{},created_at:g.created_at||new Date().toISOString(),x:Number.isFinite(g.x)?g.x:null,y:Number.isFinite(g.y)?g.y:null}));if(!confirm(`${clean.length}개 하객 데이터를 복원할까요? 기존 데이터는 삭제하지 않으며 동일 ID는 갱신됩니다.`))return;for(let i=0;i<clean.length;i+=100){const {error}=await db.from('wedding_guests').upsert(clean.slice(i,i+100),{onConflict:'id'});if(error)throw error}await loadGuests();toast(`${clean.length}개 하객 데이터를 복원했습니다.`)}catch(err){console.error(err);toast('복원 실패: 백업 형식, 테이블 컬럼 또는 관리자 정책을 확인해주세요.')}};
+$('showAdminSql').onclick=()=>{$('adminSqlBox').classList.toggle('hidden')};
+$('wallSearch').addEventListener('input',renderWall);$('wallSearchClear').onclick=()=>{$('wallSearch').value='';renderWall()};
+$('closeGuestModal').onclick=closeGuestModal;$('guestModal').addEventListener('click',e=>{if(e.target===$('guestModal'))closeGuestModal()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeGuestModal()});
+$('exportEnding').onclick=()=>{if(!admin){toast('관리자 로그인 후 이용해주세요.');return}drawEndingScene($('movieStage'));$('movieStage').toBlob(blob=>{if(!blob){toast('엔딩 이미지 저장 실패');return}downloadBlob(blob,'pixel-wedding-ending.png')})};
 function showTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===id));if(id==='wall')renderWall();if(id==='admin'&&admin){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()}if(id==='export'){drawScene($('movieStage'),guests,{bubbles:'all'})}}
 document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 function seedPreview(){guests=[normalized({id:'demo1',name:'민지',message:'두 분의 결혼을 축하해요!',avatar:{gender:'feminine',skin:COLORS.skin[1],hair:'long',hairColor:COLORS.hair[1],outfit:'dress',outfitColor:COLORS.outfit[1],accessory:'flower'}}),normalized({id:'demo2',name:'준호',message:'늘 행복하고 웃음 가득하길!',avatar:{gender:'masculine',skin:COLORS.skin[2],hair:'short',hairColor:COLORS.hair[0],outfit:'suit',outfitColor:COLORS.outfit[2],accessory:'glasses'}})];renderWall();drawScene($('movieStage'),guests,{bubbles:'all'});$('syncState').textContent='미리보기 모드'}
