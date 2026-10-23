@@ -72,7 +72,7 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
     <div><label for="gender">캐릭터 스타일</label><select id="gender"><option value="neutral">중성 캐릭터</option><option value="feminine">여성형</option><option value="masculine">남성형</option></select></div>
    </div>
    <label>피부색</label><div class="swatches" id="skinSwatches"></div>
-   <label>헤어스타일</label><select id="hair"><option value="short">짧은 머리</option><option value="long">긴 머리</option><option value="curly">곱슬 머리</option><option value="bald">짧은/민머리</option></select>
+   <label>헤어스타일</label><select id="hair"><option value="short">짧은 머리</option><option value="bob">단발머리</option><option value="long">긴 머리</option><option value="curly">곱슬 머리</option><option value="bald">짧은/민머리</option></select>
    <label>머리색</label><div class="swatches" id="hairSwatches"></div>
    <div class="formgrid">
     <div><label for="top">상의</label><select id="top"><option value="tee">캐주얼 티셔츠</option><option value="suit">정장</option><option value="dress">원피스</option><option value="hoodie">후드티</option><option value="hanbok">한복 느낌</option></select></div>
@@ -141,7 +141,7 @@ function drawSprite(ctx,x,y,scale,a,outline=true){
  const dark='#30312d',skin=a.skin||COLORS.skin[0],hair=a.hairColor||COLORS.hair[0],cloth=a.outfitColor||COLORS.outfit[0],gender=a.gender||'neutral';
  // 16-bit-inspired blocky silhouette, coordinates in 32x40 logical pixels
  px(8,2,16,2,hair);px(6,4,20,7,hair);px(5,7,3,8,hair);px(24,7,3,8,hair);
- if(a.hair==='long'){px(5,8,4,13,hair);px(23,8,4,13,hair)} else if(a.hair==='curly'){px(5,4,4,4,hair);px(10,1,5,3,hair);px(17,1,6,3,hair);px(23,4,4,4,hair)} else if(a.hair==='bald'){px(7,4,18,2,skin)}
+ if(a.hair==='bob'){px(5,7,4,10,hair);px(23,7,4,10,hair);px(6,4,20,4,hair)} else if(a.hair==='long'){px(5,8,4,13,hair);px(23,8,4,13,hair)} else if(a.hair==='curly'){px(5,4,4,4,hair);px(10,1,5,3,hair);px(17,1,6,3,hair);px(23,4,4,4,hair)} else if(a.hair==='bald'){px(7,4,18,2,skin)}
  px(7,8,18,8,skin);px(9,11,2,2,dark);px(21,11,2,2,dark);px(14,14,5,1,'#b96f65');
  if(a.accessory==='glasses'){px(8,10,6,4,'#30312d');px(18,10,6,4,'#30312d');px(14,11,4,1,'#30312d');px(9,11,4,2,'#d9eef5');px(19,11,4,2,'#d9eef5')}
  if(a.accessory==='bow'){px(6,3,5,3,'#d76d8b');px(11,4,3,2,'#f4d1db');px(14,3,4,3,'#d76d8b')}
@@ -150,8 +150,20 @@ function drawSprite(ctx,x,y,scale,a,outline=true){
  // neck, body, arms. The selected character style changes silhouette/details clearly.
  px(13,16,6,3,skin);
  if(gender==='masculine'){
-   px(6,19,20,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48');
-   px(4,20,4,9,skin);px(24,20,4,9,skin);
+   // Render the selected top distinctly for masculine characters too.
+   if(a.outfit==='suit'){
+     px(7,19,18,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48');px(5,20,3,9,skin);px(24,20,3,9,skin);
+   } else if(a.outfit==='hoodie'){
+     px(7,19,18,12,cloth);px(11,19,10,4,'#e9e3d7');px(5,21,3,8,skin);px(24,21,3,8,skin);px(13,25,6,3,'#d4d0c5');
+   } else if(a.outfit==='hanbok'){
+     px(7,19,18,7,cloth);px(5,20,3,8,skin);px(24,20,3,8,skin);px(5,25,22,7,'#fff0d1');px(12,21,8,2,'#c46e75');
+   } else if(a.outfit==='dress'){
+     // If a masculine style is selected, show the chosen outfit as a tunic rather than silently ignoring it.
+     px(8,19,16,7,cloth);px(6,26,20,6,cloth);px(5,20,3,9,skin);px(24,20,3,9,skin);
+   } else {
+     px(7,19,18,12,cloth);px(5,21,3,8,skin);px(24,21,3,8,skin);
+     if(a.outfit==='tee')px(14,21,4,3,'#fff9e9');
+   }
    px(9,31,5,6,'#41454c');px(18,31,5,6,'#41454c');
  } else if(gender==='feminine'){
    if(a.outfit==='suit'){px(8,19,16,12,cloth);px(14,19,4,9,'#fff9e9');px(15,19,2,5,'#b85c48')}
@@ -172,7 +184,7 @@ function drawSprite(ctx,x,y,scale,a,outline=true){
    px(9,31,5,6,'#4b4d49');px(18,31,5,6,'#4b4d49');
  }
  px(7,37,8,2,dark);px(17,37,8,2,dark);
- if(gender==='feminine'){px(5,8,4,15,hair);px(23,8,4,15,hair);px(6,7,3,4,hair);px(23,7,3,4,hair)}
+ if(gender==='feminine'){if(a.hair==='bob'){px(5,7,4,10,hair);px(23,7,4,10,hair);px(6,4,20,4,hair)}else{px(5,8,4,15,hair);px(23,8,4,15,hair)}px(6,7,3,4,hair);px(23,7,3,4,hair)}
 }
 function drawPreview(){const c=$('avatarPreview'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.imageSmoothingEnabled=false;drawSprite(ctx,0,0,1,getAvatar());$('bubblePreview').textContent=$('message').value||'축하 메시지가 여기에 표시돼요!';$('previewName').textContent=$('guestName').value||'하객 이름'}
 ['guestName','message'].forEach(id=>$(id).addEventListener('input',drawPreview));
