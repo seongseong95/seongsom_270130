@@ -192,45 +192,41 @@ function drawPreview(){const c=$('avatarPreview'),ctx=c.getContext('2d');ctx.cle
 function normalized(g){return {id:g.id||uid(),name:g.name||'하객',message:g.message||'',avatar:g.avatar||getAvatar(),created_at:g.created_at||new Date().toISOString(),x:g.x??null,y:g.y??null}}
 function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=32;c.height=40;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
 function canvasCtx(c){const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;return ctx}
-function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
+function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true,visibleCount=items.length,fadeIndex=-1,fadeProgress=1}={}){
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
- // Pixel-art wedding hall: dusk windows, chandeliers, flower arch, stage, aisle and candle lights.
  ctx.fillStyle='#20283e';ctx.fillRect(0,0,W,H);
- // tall ballroom windows
  for(let i=0;i<8;i++){const wx=i*W/8+W/64;ctx.fillStyle='#32445e';ctx.fillRect(wx,0,W/13,H*.43);ctx.strokeStyle='#c4a66c';ctx.lineWidth=5;ctx.strokeRect(wx,0,W/13,H*.43);ctx.fillStyle='#f6dca0';for(let k=0;k<5;k++)ctx.fillRect(wx+8+(k*17)%(W/15),18+(k*31)%Math.max(30,H*.35),5,5)}
- // ceiling garlands and warm chandeliers
  ctx.fillStyle='#b99a5a';ctx.fillRect(0,0,W,14);ctx.fillStyle='#e5c77e';
  for(let i=0;i<7;i++){const cx=(i+.5)*W/7;ctx.fillRect(cx-20,25,40,5);ctx.fillRect(cx-14,30,28,5);ctx.fillRect(cx-7,35,14,12);ctx.fillStyle='#fff0ba';ctx.fillRect(cx-17,38,5,10);ctx.fillRect(cx+12,38,5,10);ctx.fillStyle='#e5c77e'}
- // stage platform and stairs
  ctx.fillStyle='#9d7c55';ctx.fillRect(W*.25,H*.29,W*.5,H*.13);ctx.fillStyle='#e8d5a5';ctx.fillRect(W*.27,H*.31,W*.46,H*.09);ctx.fillStyle='#d4b779';ctx.fillRect(W*.22,H*.42,W*.56,H*.025);ctx.fillRect(W*.28,H*.445,W*.44,H*.025);ctx.fillRect(W*.34,H*.47,W*.32,H*.025);
- // floral arch around couple
  ctx.strokeStyle='#d6b86d';ctx.lineWidth=Math.max(5,W*.006);ctx.beginPath();ctx.moveTo(W*.37,H*.39);ctx.lineTo(W*.37,H*.27);ctx.quadraticCurveTo(W*.5,H*.17,W*.63,H*.27);ctx.lineTo(W*.63,H*.39);ctx.stroke();
  for(let i=0;i<42;i++){const side=i%2,xx=side?W*.63-(i%7)*W*.006:W*.37+(i%7)*W*.006,yy=H*.23+Math.floor(i/2)*H*.004;ctx.fillStyle=['#fff0cf','#e9c5c4','#d5e2c2','#f6dfa0'][i%4];ctx.fillRect(xx+(i*13)%Math.max(1,W*.02),yy,8,8)}
- // aisle runner and candle rows
  ctx.fillStyle='#d5b77c';ctx.fillRect(W*.38,H*.49,W*.24,H*.51);ctx.fillStyle='#f8e8c9';ctx.fillRect(W*.40,H*.49,W*.20,H*.51);
  for(let i=0;i<18;i++){const yy=H*.51+i*H*.027;for(const side of [-1,1]){const xx=W*.5+side*(W*.12+i*W*.003);ctx.fillStyle='#e6c982';ctx.fillRect(xx,yy,9,9);ctx.fillStyle='#fff0bb';ctx.fillRect(xx+2,yy-6,5,6)}}
- // little sparkle confetti
  for(let i=0;i<90;i++){ctx.fillStyle=['#e8dcbf','#d7e4cb','#f1d4d0','#d5e6ee'][i%4];ctx.fillRect((i*197+47)%W,(i*113+31)%H,7,7)}
  if(showTitle){ctx.fillStyle='#fff0cf';ctx.textAlign='center';ctx.font='bold 35px "Gowun Dodum",sans-serif';ctx.fillText('윤성 ♥ 소미의 결혼을 축하합니다',W/2,64);ctx.font='20px "Gowun Dodum",sans-serif';ctx.fillText('OUR PIXEL GUESTBOOK · 2027.01.30',W/2,94)}
- // bride and groom standing on the stage (pixel sprites)
  drawSprite(ctx,Math.round(W*.465-24),Math.round(H*.30),1.9,{gender:'masculine',skin:'#f1c6a5',hair:'short',hairColor:'#302a2b',outfit:'suit',outfitColor:'#343c50',accessory:'none'});
  drawSprite(ctx,Math.round(W*.535-24),Math.round(H*.30),1.9,{gender:'feminine',skin:'#f7d7b5',hair:'long',hairColor:'#67432f',outfit:'dress',outfitColor:'#fff0d1',accessory:'flower'});
  ctx.fillStyle='#fff0cf';ctx.font='bold 17px "Gowun Dodum",sans-serif';ctx.textAlign='center';ctx.fillText('윤성 ♥ 소미',W*.5,H*.30+88);
- const top=showTitle?Math.round(H*.53):Math.round(H*.49), cols=Math.max(1,Math.floor(W/150)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
+ const top=showTitle?Math.round(H*.53):Math.round(H*.49),cols=Math.max(1,Math.floor(W/150)),cellW=W/cols,rows=Math.ceil(items.length/cols),cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
  items.forEach((g,i)=>{
-  if(active>=0 && bubbles==='sequence' && i!==active){} // still draw all avatars
+  if(i>=visibleCount)return;
   const col=i%cols,row=Math.floor(i/cols),cx=col*cellW+cellW/2,cy=top+row*cellH;
   const x=(g.x!==null&&g.x!==undefined&&layout)?g.x*W:cx;
-  const y=(g.y!==null&&g.y!==undefined&&layout)?g.y*H:cy;
+  const targetY=(g.y!==null&&g.y!==undefined&&layout)?g.y*H:cy;
+  const isFading=i===fadeIndex,progress=isFading?Math.max(0,Math.min(1,fadeProgress)):1;
+  const y=targetY+(isFading?(1-progress)*18:0);
+  ctx.save();ctx.globalAlpha=progress;
   const showBubble=bubbles==='all'||(bubbles==='sequence'&&i===active);
   if(showBubble){ctx.font='16px "Gowun Dodum",sans-serif';const maxW=Math.min(cellW-12,200),words=(g.message||'').slice(0,180);const lines=wrapText(ctx,words,maxW-20);const bw=Math.min(maxW,Math.max(85,...lines.map(l=>ctx.measureText(l).width+22))),bh=lines.length*21+18;
    ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.lineWidth=3;pixelRect(ctx,x,y-22-bh,bw,bh,'#fffdf8','#34382f');ctx.fillStyle='#30332d';ctx.textAlign='center';lines.slice(0,5).forEach((line,j)=>ctx.fillText(line,x,y-22-bh+24+j*21,bw-12));
    ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.beginPath();ctx.moveTo(x-5,y-22);ctx.lineTo(x+8,y-22);ctx.lineTo(x+1,y-12);ctx.closePath();ctx.fill();ctx.stroke();
   }
   drawSprite(ctx,Math.round(x-24),Math.round(y),1.5,g.avatar);
-  ctx.textAlign='center';ctx.fillStyle='#30332d';ctx.font='bold 16px "Gowun Dodum",sans-serif';ctx.fillText(g.name,x,y+72,cellW-10);
+  ctx.textAlign='center';ctx.font='bold 22px "Gowun Dodum",sans-serif';ctx.lineWidth=5;ctx.lineJoin='round';ctx.strokeStyle='#20283e';ctx.strokeText(g.name,x,y+76,cellW-10);ctx.fillStyle='#fffdf8';ctx.fillText(g.name,x,y+76,cellW-10);
+  ctx.restore();
  });
- if(showTitle){ctx.fillStyle='#30332d';ctx.textAlign='center';ctx.font='16px "Gowun Dodum",sans-serif';ctx.fillText(`${items.length}명의 마음이 함께합니다`,W/2,H-22)}
+ if(showTitle){ctx.fillStyle='#30332d';ctx.textAlign='center';ctx.font='16px "Gowun Dodum",sans-serif';ctx.fillText(`${visibleCount}명의 마음이 함께합니다`,W/2,H-22)}
 }
 function wrapText(ctx,text,max){const out=[];let line='';for(const ch of text){if(ch==='\n'){out.push(line);line='';continue}const test=line+ch;if(ctx.measureText(test).width>max&&line){out.push(line);line=ch}else line=test}if(line||!out.length)out.push(line);return out}
 function pixelRect(ctx,x,y,w,h,fill,stroke){ctx.fillStyle=fill;ctx.fillRect(x-w/2,y,w,h);ctx.strokeStyle=stroke;ctx.strokeRect(x-w/2,y,w,h)}
@@ -258,18 +254,35 @@ function downloadBlob(blob,name){const url=URL.createObjectURL(blob),a=document.
 let stopRequested=false;
 $('exportVideo').onclick=async()=>{
  if(!guests.length){toast('먼저 하객 캐릭터를 등록해주세요.');return}
- const canvas=$('movieStage'),ctx=canvasCtx(canvas),mode=$('exportMode').value,seconds=Number($('duration').value);
+ const canvas=$('movieStage'),mode=$('exportMode').value,seconds=Number($('duration').value);
  if(!canvas.captureStream||!window.MediaRecorder){toast('이 브라우저에서는 영상 녹화가 지원되지 않습니다. 최신 Chrome 데스크톱을 사용해주세요.');return}
  const stream=canvas.captureStream(30);let mime='video/webm;codecs=vp9';if(!MediaRecorder.isTypeSupported(mime))mime='video/webm';
- try{recorder=new MediaRecorder(stream,{mimeType:mime})}catch(e){toast('녹화 시작 실패');return}
- recordChunks=[];recorder.ondataavailable=e=>{if(e.data.size)recordChunks.push(e.data)};recorder.onstop=()=>{downloadBlob(new Blob(recordChunks,{type:recorder.mimeType||'video/webm'}),'pixel-wedding-guestbook.webm');stream.getTracks().forEach(t=>t.stop());$('stopVideo').disabled=true;$('exportVideo').disabled=false;$('exportStatus').textContent='영상 저장 완료. 필요한 경우 편집 프로그램에서 MP4로 변환하세요.'};
- recorder.start();stopRequested=false;$('stopVideo').disabled=false;$('exportVideo').disabled=true;$('exportStatus').textContent='영상 녹화 중… 페이지를 닫지 마세요.';
- const frames=mode==='entrance'?guests.length+1:guests.length;
- for(let i=0;i<frames&&!stopRequested;i++){
-   if(mode==='entrance'){drawScene(canvas,guests.slice(0,Math.max(0,i)),{bubbles:'all'});await new Promise(r=>setTimeout(r,350))}
-   drawScene(canvas,guests,{bubbles:'sequence',active:i%Math.max(1,guests.length)});await new Promise(r=>setTimeout(r,seconds*1000));
- }
- if(recorder&&recorder.state!=='inactive')recorder.stop();
+ try{recorder=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:6000000})}catch(e){stream.getTracks().forEach(t=>t.stop());toast('녹화 시작 실패: '+e.message);return}
+ recordChunks=[];stopRequested=false;
+ recorder.ondataavailable=e=>{if(e.data&&e.data.size)recordChunks.push(e.data)};
+ recorder.onerror=e=>{console.error('MediaRecorder error',e);$('exportStatus').textContent='녹화 중 오류가 발생했습니다.'};
+ recorder.onstop=()=>{const blob=new Blob(recordChunks,{type:recorder.mimeType||'video/webm'});if(blob.size)downloadBlob(blob,'pixel-wedding-guestbook.webm');else toast('녹화 파일이 비어 있습니다. 다시 시도해주세요.');stream.getTracks().forEach(t=>t.stop());$('stopVideo').disabled=true;$('exportVideo').disabled=false;$('exportStatus').textContent=blob.size?'영상 저장 완료. WebM 파일을 확인해주세요.':'영상 저장 실패'};
+ recorder.start(250);$('stopVideo').disabled=false;$('exportVideo').disabled=true;$('exportStatus').textContent='영상 녹화 중… 페이지를 닫지 마세요.';
+ const waitFrame=()=>new Promise(resolve=>requestAnimationFrame(resolve));
+ const sleepFrames=async(ms,draw)=>{const end=performance.now()+ms;while(!stopRequested&&performance.now()<end){const now=performance.now();draw(now);await waitFrame()}};
+ try{
+   if(mode==='entrance'){
+     drawScene(canvas,guests,{bubbles:'all',visibleCount:0});
+     await sleepFrames(250,()=>drawScene(canvas,guests,{bubbles:'all',visibleCount:0}));
+     for(let i=0;i<guests.length&&!stopRequested;i++){
+       const fadeMs=800,started=performance.now();
+       await sleepFrames(fadeMs,now=>{const p=Math.min(1,(now-started)/fadeMs);drawScene(canvas,guests,{bubbles:'all',visibleCount:i+1,fadeIndex:i,fadeProgress:p})});
+       await sleepFrames(seconds*1000,()=>drawScene(canvas,guests,{bubbles:'all',visibleCount:i+1}));
+     }
+     if(!stopRequested)drawScene(canvas,guests,{bubbles:'all',visibleCount:guests.length});
+   }else{
+     for(let i=0;i<guests.length&&!stopRequested;i++){
+       drawScene(canvas,guests,{bubbles:'sequence',active:i});
+       await sleepFrames(seconds*1000,()=>drawScene(canvas,guests,{bubbles:'sequence',active:i}));
+     }
+   }
+ }catch(e){console.error('영상 렌더링 실패',e);toast('영상 생성 중 오류: '+e.message)}
+ finally{if(recorder&&recorder.state!=='inactive')recorder.stop()}
 };
 $('stopVideo').onclick=()=>{stopRequested=true;if(recorder&&recorder.state!=='inactive')recorder.stop()};
 swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');drawPreview();
