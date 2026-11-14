@@ -722,7 +722,7 @@ function ensurePortraitViewer(){
 }
 
 let viewerAnimationToken=0,viewerRaf=0,viewerStartedAt=0;
-const portraitMotion={cols:3,cellW:300,cellH:210,headerH:360,footerH:120};
+const portraitMotion={cols:3,cellW:300,cellH:310,headerH:360,footerH:120};
 function portraitCanvasSize(){
  const rows=Math.ceil(guests.length/portraitMotion.cols);
  return {width:900,height:Math.max(1250,portraitMotion.headerH+rows*portraitMotion.cellH+portraitMotion.footerH)};
@@ -784,49 +784,52 @@ function drawPortraitFrame(now,elapsed,revealAll=false){
  const gridTop=portraitMotion.headerH+205;
  guests.forEach((g,i)=>{
    const col=i%cols,row=Math.floor(i/cols);
-   const cx=col*cellW+cellW/2,baseY=gridTop+row*cellH;
-   // Staggered entrance followed by a repeating idle / step / hop animation.
-   const arrival=Math.max(0,Math.min(1,(elapsed-i*.10)/.72));
+   const cx=col*cellW+cellW/2,rowTop=gridTop+row*cellH;
+
+   // Each guest owns one fixed vertical lane: bubble, avatar, then name.
+   // This prevents long messages or animated movement from separating the three.
+   const arrival=Math.max(0,Math.min(1,(elapsed-i*.18)/.82));
    if(!revealAll&&arrival<=0)return;
    const eased=1-Math.pow(1-arrival,3);
    const phase=elapsed*2.4+i*1.37;
-   const walkX=Math.sin(phase*2.2)*5;
-   const hop=Math.max(0,Math.sin(phase*1.45+i*.5))*5;
+   const walkX=Math.sin(phase*2.2)*3;
+   const hop=Math.max(0,Math.sin(phase*1.45+i*.5))*3;
    const x=cx+walkX;
-   const y=baseY+(1-eased)*48-hop;
+   const avatarTop=rowTop+92+(1-eased)*36-hop;
+   const bubbleProgress=Math.max(0,Math.min(1,(arrival-.12)/.48));
 
-   // Speech bubble appears with a short pop-in.
-   const bubbleProgress=Math.max(0,Math.min(1,(arrival-.22)/.55));
+   // Speech bubble is fixed at the top of this guest's lane.
    if(bubbleProgress>0){
      const bm=bubbleLayout(g.message||'',cellW-34,'bold 15px "Gowun Dodum",sans-serif');
-     const bw=bm.width,bh=Math.min(76,Math.max(38,bm.height));
-     const pop=.88+.12*bubbleProgress;
-     ctx.save();ctx.globalAlpha=bubbleProgress;ctx.translate(x,baseY-8);ctx.scale(pop,pop);
-     const bx=-bw/2,by=-bh;
-     ctx.fillStyle='#34382f';ctx.fillRect(bx+4,by+4,bw,bh);
+     const bw=Math.min(cellW-34,Math.max(150,bm.width));
+     const lines=bm.lines.slice(0,2);
+     const bh=Math.max(48,lines.length*21+20);
+     const pop=.94+.06*bubbleProgress;
+     const bx=cx-bw/2,by=rowTop+5;
+     ctx.save();ctx.globalAlpha=bubbleProgress;ctx.translate(cx,by+bh/2);ctx.scale(pop,pop);
+     ctx.fillStyle='#34382f';ctx.fillRect(-bw/2+4,-bh/2+4,bw,bh);
      ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.lineWidth=2;
-     ctx.fillRect(bx,by,bw,bh);ctx.strokeRect(bx,by,bw,bh);
-     ctx.beginPath();ctx.moveTo(-bw/2+18,0);ctx.lineTo(-bw/2+34,0);ctx.lineTo(-bw/2+25,10);ctx.closePath();ctx.fill();ctx.stroke();
-     ctx.font='bold 15px "Gowun Dodum",sans-serif';ctx.fillStyle='#25232a';ctx.textAlign='center';
-     bm.lines.slice(0,2).forEach((line,j)=>ctx.fillText(line,0,by+23+j*22,bw-16));
+     ctx.fillRect(-bw/2,-bh/2,bw,bh);ctx.strokeRect(-bw/2,-bh/2,bw,bh);
+     ctx.beginPath();ctx.moveTo(-bw/2+18,bh/2-1);ctx.lineTo(-bw/2+34,bh/2-1);ctx.lineTo(-bw/2+25,bh/2+10);ctx.closePath();ctx.fill();ctx.stroke();
+     ctx.font='bold 15px "Gowun Dodum",sans-serif';ctx.fillStyle='#25232a';ctx.textAlign='center';ctx.textBaseline='middle';
+     lines.forEach((line,j)=>ctx.fillText(line,0,(j-(lines.length-1)/2)*21,bw-18));
      ctx.restore();
    }
 
-   // Character is rendered from the actual stored avatar layers and moves continuously.
-   ctx.save();
-   ctx.translate(x,y+108);
-   const bob=Math.sin(phase*2.2)*.035;
-   ctx.rotate(Math.sin(phase*1.1)*.025);
-   ctx.scale(1+Math.sin(phase*2)*.018,1-Math.sin(phase*2)*.018);
-   drawSprite(ctx,-62,-158,.56,g.avatar);
+   // Character is centered directly below its own bubble.
+   ctx.save();ctx.globalAlpha=arrival;
+   ctx.translate(x,avatarTop+78.4);
+   ctx.rotate(Math.sin(phase*1.1)*.018);
+   ctx.scale(1+Math.sin(phase*2)*.012,1-Math.sin(phase*2)*.012);
+   drawSprite(ctx,-61.6,-78.4,.56,g.avatar);
    ctx.restore();
 
-   // Name label.
+   // Name sits immediately beneath the character, in the same center column.
    ctx.save();ctx.globalAlpha=arrival;ctx.textAlign='center';ctx.textBaseline='middle';
    ctx.font='bold 20px "Gowun Dodum",sans-serif';ctx.lineJoin='round';ctx.lineWidth=5;
    ctx.strokeStyle='#fff8ec';ctx.fillStyle='#573047';
-   ctx.strokeText(String(g.name||'하객'),x,baseY+190,cellW-24);
-   ctx.fillText(String(g.name||'하객'),x,baseY+190,cellW-24);
+   ctx.strokeText(String(g.name||'하객'),cx,rowTop+278,cellW-24);
+   ctx.fillText(String(g.name||'하객'),cx,rowTop+278,cellW-24);
    ctx.restore();
  });
  ctx.fillStyle='#fff5dc';ctx.textAlign='center';ctx.font='bold 25px "Gowun Dodum",sans-serif';
