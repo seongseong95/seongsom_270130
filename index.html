@@ -318,6 +318,38 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
   }
 }
 
+
+
+/* Mobile guestbook viewer fullscreen fallback for browsers without Fullscreen API. */
+body.mobile-stage-fullscreen {
+  overflow: hidden !important;
+}
+body.mobile-stage-fullscreen #movieStage {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 99999 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  height: 100dvh !important;
+  max-width: none !important;
+  object-fit: contain !important;
+  background: #242c43 !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  margin: 0 !important;
+  touch-action: manipulation;
+}
+
+
+/* Portrait full-screen guestbook poster, inspired by the supplied mobile reference recording. */
+#mobileGuestbookViewer{display:none;position:fixed;inset:0;z-index:100000;background:#10131b;color:#fff;overflow:hidden}
+#mobileGuestbookViewer.open{display:flex;flex-direction:column}
+#mobileGuestbookViewer #closeMobileViewer{position:absolute;z-index:3;top:calc(env(safe-area-inset-top, 0px) + 10px);right:12px;min-height:40px;padding:6px 13px;background:#fffaf0;color:#292b27;border:2px solid #292b27;box-shadow:2px 2px 0 #292b27;font-weight:bold}
+#mobileGuestbookViewer .mobile-viewer-scroll{width:100%;height:100%;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:56px 10px 24px}
+#mobileGuestbookViewer canvas{display:block;width:min(100%,520px);height:auto;margin:0 auto;background:#182337;box-shadow:0 0 0 3px #d5b76c}
+#mobileGuestbookViewer.fallback-fullscreen{display:flex;position:fixed;inset:0;width:100vw;height:100vh;height:100dvh}
+@media(min-width:761px){#mobileGuestbookViewer{display:none!important}}
+
 </style>
 </head>
 <body><div class="ambient" aria-hidden="true">♥　✦　♡　✧　♥</div>
@@ -676,7 +708,199 @@ function renderAdminList(){const root=$('adminGuestList');if(!root)return;root.r
 function updateSelectionStatus(){const el=$('selectionStatus');if(el)el.textContent=`선택된 하객: ${selectedGuestIds.size}명`}
 function saveCsv(){const rows=[['이름','축하 메시지','등록 시간','X','Y'],...guests.map(g=>[g.name,g.message,g.created_at,g.x,g.y])];const csv='\ufeff'+rows.map(row=>row.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');downloadBlob(new Blob([csv],{type:'text/csv;charset=utf-8;'}),'pixel-wedding-guests.csv')}
 function showTab(id){document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.id===id));if(id==='wall')renderWall();if(id==='admin'&&admin){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()}if(id==='export'){drawScene($('movieStage'),guests,{bubbles:'all'})}}
-document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+let viewerOverlay=null,viewerCanvas=null,viewerFallback=false;
+function ensurePortraitViewer(){
+ if(viewerOverlay)return;
+ viewerOverlay=document.createElement('div');
+ viewerOverlay.id='mobileGuestbookViewer';
+ viewerOverlay.innerHTML='<button type="button" id="closeMobileViewer" aria-label="전체 화면 닫기">× 닫기</button><div class="mobile-viewer-scroll"><canvas id="mobileGuestbookPoster" aria-label="전체 하객 방명록"></canvas></div>';
+ document.body.append(viewerOverlay);
+ viewerCanvas=$('mobileGuestbookPoster');
+ $('closeMobileViewer').addEventListener('click',closePortraitViewer);
+ viewerOverlay.addEventListener('click',e=>{if(e.target===viewerOverlay)closePortraitViewer()});
+}
+
+let viewerAnimationToken=0,viewerRaf=0,viewerStartedAt=0;
+const portraitMotion={cols:3,cellW:300,cellH:210,headerH:360,footerH:120};
+function portraitCanvasSize(){
+ const rows=Math.ceil(guests.length/portraitMotion.cols);
+ return {width:900,height:Math.max(1250,portraitMotion.headerH+rows*portraitMotion.cellH+portraitMotion.footerH)};
+}
+function drawPortraitFrame(now,elapsed,revealAll=false){
+ ensurePortraitViewer();
+ const c=viewerCanvas,ctx=c.getContext('2d');
+ const size=portraitCanvasSize();
+ if(c.width!==size.width||c.height!==size.height){c.width=size.width;c.height=size.height;}
+ const W=c.width,H=c.height,cols=portraitMotion.cols,cellW=portraitMotion.cellW,cellH=portraitMotion.cellH;
+ // Original illustrated garden artwork is used as a background only; guests are drawn live from their saved avatar data.
+ ctx.clearRect(0,0,W,H);
+ if(gardenBackground.complete&&gardenBackground.naturalWidth){
+   const im=gardenBackground,scale=Math.max(W/im.naturalWidth,H/im.naturalHeight);
+   const sw=W/scale,sh=H/scale;
+   ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,W,H);
+ }else{
+   const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
+   ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ }
+ ctx.fillStyle='rgba(28,35,50,.18)';ctx.fillRect(0,0,W,H);
+ // Soft floating sparkle accents; positions change every frame.
+ for(let i=0;i<30;i++){
+   const x=(i*173+Math.sin(elapsed*.8+i)*22)%W;
+   const y=(i*251-elapsed*18%(H+40)+H+40)%(H+40);
+   ctx.globalAlpha=.28+.35*(.5+.5*Math.sin(elapsed*2+i));
+   ctx.fillStyle=i%2?'#fff0cf':'#f6cbd4';
+   ctx.fillRect(x,y,5,5);
+ }
+ ctx.globalAlpha=1;
+
+ // Header plaque and wedding title.
+ ctx.fillStyle='rgba(31,39,57,.78)';ctx.fillRect(0,0,W,portraitMotion.headerH);
+ ctx.textAlign='center';ctx.textBaseline='middle';
+ ctx.fillStyle='#f6dc9a';ctx.font='bold 28px "Gowun Dodum",sans-serif';
+ ctx.fillText('✦  A LITTLE NOTE, A FOREVER MEMORY  ✦',W/2,48);
+ ctx.fillStyle='#fff4dc';ctx.font='bold 49px "Press Start 2P",monospace';
+ ctx.fillText('OUR PIXEL',W/2,122);
+ ctx.fillText('GUESTBOOK',W/2,190);
+ ctx.font='bold 35px "Gowun Dodum",sans-serif';
+ ctx.fillText('윤성 ♥ 소미',W/2,254);
+ ctx.font='24px "Gowun Dodum",sans-serif';ctx.fillText('2027. 01. 30',W/2,304);
+
+ // Couple artwork, drawn from the embedded couple sprites rather than a captured wall image.
+ const groomImg=assetImage('couple-groom'),brideImg=assetImage('couple-bride');
+ const coupleY=portraitMotion.headerH+6,coupleH=150;
+ if(groomImg?.complete&&groomImg.naturalWidth){
+   const w=coupleH*groomImg.naturalWidth/groomImg.naturalHeight;
+   ctx.drawImage(groomImg,W*.43-w/2,coupleY,w,coupleH);
+ }
+ if(brideImg?.complete&&brideImg.naturalWidth){
+   const w=coupleH*brideImg.naturalWidth/brideImg.naturalHeight;
+   ctx.drawImage(brideImg,W*.57-w/2,coupleY,w,coupleH);
+ }
+ ctx.fillStyle='#fffaf0';ctx.font='bold 20px "Gowun Dodum",sans-serif';
+ ctx.fillText('신랑 윤성',W*.43,coupleY+coupleH+17);
+ ctx.fillText('신부 소미',W*.57,coupleY+coupleH+17);
+
+ const gridTop=portraitMotion.headerH+205;
+ guests.forEach((g,i)=>{
+   const col=i%cols,row=Math.floor(i/cols);
+   const cx=col*cellW+cellW/2,baseY=gridTop+row*cellH;
+   // Staggered entrance followed by a repeating idle / step / hop animation.
+   const arrival=Math.max(0,Math.min(1,(elapsed-i*.10)/.72));
+   if(!revealAll&&arrival<=0)return;
+   const eased=1-Math.pow(1-arrival,3);
+   const phase=elapsed*2.4+i*1.37;
+   const walkX=Math.sin(phase*2.2)*5;
+   const hop=Math.max(0,Math.sin(phase*1.45+i*.5))*5;
+   const x=cx+walkX;
+   const y=baseY+(1-eased)*48-hop;
+
+   // Speech bubble appears with a short pop-in.
+   const bubbleProgress=Math.max(0,Math.min(1,(arrival-.22)/.55));
+   if(bubbleProgress>0){
+     const bm=bubbleLayout(g.message||'',cellW-34,'bold 15px "Gowun Dodum",sans-serif');
+     const bw=bm.width,bh=Math.min(76,Math.max(38,bm.height));
+     const pop=.88+.12*bubbleProgress;
+     ctx.save();ctx.globalAlpha=bubbleProgress;ctx.translate(x,baseY-8);ctx.scale(pop,pop);
+     const bx=-bw/2,by=-bh;
+     ctx.fillStyle='#34382f';ctx.fillRect(bx+4,by+4,bw,bh);
+     ctx.fillStyle='#fffdf8';ctx.strokeStyle='#34382f';ctx.lineWidth=2;
+     ctx.fillRect(bx,by,bw,bh);ctx.strokeRect(bx,by,bw,bh);
+     ctx.beginPath();ctx.moveTo(-bw/2+18,0);ctx.lineTo(-bw/2+34,0);ctx.lineTo(-bw/2+25,10);ctx.closePath();ctx.fill();ctx.stroke();
+     ctx.font='bold 15px "Gowun Dodum",sans-serif';ctx.fillStyle='#25232a';ctx.textAlign='center';
+     bm.lines.slice(0,2).forEach((line,j)=>ctx.fillText(line,0,by+23+j*22,bw-16));
+     ctx.restore();
+   }
+
+   // Character is rendered from the actual stored avatar layers and moves continuously.
+   ctx.save();
+   ctx.translate(x,y+108);
+   const bob=Math.sin(phase*2.2)*.035;
+   ctx.rotate(Math.sin(phase*1.1)*.025);
+   ctx.scale(1+Math.sin(phase*2)*.018,1-Math.sin(phase*2)*.018);
+   drawSprite(ctx,-62,-158,.56,g.avatar);
+   ctx.restore();
+
+   // Name label.
+   ctx.save();ctx.globalAlpha=arrival;ctx.textAlign='center';ctx.textBaseline='middle';
+   ctx.font='bold 20px "Gowun Dodum",sans-serif';ctx.lineJoin='round';ctx.lineWidth=5;
+   ctx.strokeStyle='#fff8ec';ctx.fillStyle='#573047';
+   ctx.strokeText(String(g.name||'하객'),x,baseY+190,cellW-24);
+   ctx.fillText(String(g.name||'하객'),x,baseY+190,cellW-24);
+   ctx.restore();
+ });
+ ctx.fillStyle='#fff5dc';ctx.textAlign='center';ctx.font='bold 25px "Gowun Dodum",sans-serif';
+ ctx.fillText(`${guests.length}명의 마음이 함께합니다`,W/2,H-65);
+ ctx.font='20px "Gowun Dodum",sans-serif';ctx.fillText('함께해 주셔서 감사합니다 ♥',W/2,H-32);
+}
+function animatePortraitReveal(){
+ viewerAnimationToken++;
+ const token=viewerAnimationToken;
+ viewerStartedAt=performance.now();
+ if(viewerRaf)cancelAnimationFrame(viewerRaf);
+ const frame=now=>{
+   if(token!==viewerAnimationToken||!viewerOverlay?.classList.contains('open'))return;
+   const elapsed=(now-viewerStartedAt)/1000;
+   drawPortraitFrame(now,elapsed);
+   viewerRaf=requestAnimationFrame(frame);
+ };
+ viewerRaf=requestAnimationFrame(frame);
+}
+async function openPortraitViewer(){
+ ensurePortraitViewer();
+ showTab('export');
+ viewerOverlay.classList.add('open');
+ viewerFallback=false;
+ let fullscreenPromise=null;
+ try{
+   if(viewerOverlay.requestFullscreen)fullscreenPromise=viewerOverlay.requestFullscreen();
+   else throw new Error('Fullscreen API unavailable');
+ }catch(e){
+   viewerFallback=true;
+   viewerOverlay.classList.add('fallback-fullscreen');
+ }
+ if(fullscreenPromise){
+   try{await fullscreenPromise}
+   catch(e){
+     viewerFallback=true;
+     viewerOverlay.classList.add('fallback-fullscreen');
+   }
+ }
+ animatePortraitReveal();
+}
+async function closePortraitViewer(){
+ if(!viewerOverlay)return;
+ viewerAnimationToken++;
+ if(viewerRaf)cancelAnimationFrame(viewerRaf);
+ viewerRaf=0;
+ viewerOverlay.classList.remove('open','fallback-fullscreen');
+ if(document.fullscreenElement){
+   try{await document.exitFullscreen()}catch(e){}
+ }
+ showTab('create');
+}
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{
+ if(b.dataset.tab==='export' && window.matchMedia('(max-width: 760px)').matches){
+   openPortraitViewer();
+ }else{
+   showTab(b.dataset.tab);
+ }
+});
+document.addEventListener('fullscreenchange',()=>{
+ if(viewerOverlay?.classList.contains('open')&&!document.fullscreenElement&&!viewerFallback){
+   viewerAnimationToken++;
+   if(viewerRaf)cancelAnimationFrame(viewerRaf);
+   viewerRaf=0;
+   viewerOverlay.classList.remove('open');
+   showTab('create');
+ }
+});
+document.addEventListener('keydown',e=>{
+ if(e.key==='Escape'&&viewerOverlay?.classList.contains('open')&&!document.fullscreenElement){
+   viewerOverlay.classList.remove('open','fallback-fullscreen');
+   showTab('create');
+ }
+});
 function seedPreview(){guests=[normalized({id:'demo1',name:'민지',message:'두 분의 결혼을 축하해요!',avatar:{gender:'feminine',skin:COLORS.skin[1],hair:'long',hairColor:COLORS.hair[1],outfit:'dress',outfitColor:COLORS.outfit[1],accessory:'flower'}}),normalized({id:'demo2',name:'준호',message:'늘 행복하고 웃음 가득하길!',avatar:{gender:'masculine',skin:COLORS.skin[2],hair:'short',hairColor:COLORS.hair[0],outfit:'suit',outfitColor:COLORS.outfit[2],accessory:'glasses'}})];renderWall();drawScene($('movieStage'),guests,{bubbles:'all'});$('syncState').textContent='미리보기 모드'}
 async function loadGuests(){if(!db){seedPreview();return}const localPositions=new Map(guests.map(g=>[String(g.id),{x:g.x,y:g.y}]));const keepLocalPositions=admin&&layoutDirty;const settingResult=await db.from('wedding_settings').select('submissions_open').eq('id',1).maybeSingle();if(!settingResult.error&&settingResult.data){submissionsOpen=settingResult.data.submissions_open;$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감')}const {data,error}=await db.from('wedding_guests').select('id,name,message,avatar,created_at,x,y').order('created_at',{ascending:true}).limit(1000);if(error){toast('데이터를 불러오지 못했습니다. 설정을 확인해주세요.');console.error(error);return}guests=(data||[]).map(row=>{const g=normalized(row),p=localPositions.get(String(g.id));return keepLocalPositions&&p&&p.x!=null&&p.y!=null?{...g,x:p.x,y:p.y}:g});$('syncState').textContent='실시간 연결';renderWall();if(admin){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()}drawScene($('movieStage'),guests,{bubbles:'all'})}
 $('guestForm').onsubmit=async e=>{e.preventDefault();if(!submissionsOpen){toast('축하 메시지 접수가 마감되었습니다.');return}const name=$('guestName').value.trim(),message=$('message').value.trim();if(!name||!message)return;if(!db){toast('미리보기 모드입니다. README 설정 후 실제 등록이 가능합니다.');return}
