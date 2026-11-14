@@ -636,13 +636,8 @@ function fitSceneCanvasHeight(canvas,itemCount){
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
  fitSceneCanvasHeight(canvas,items.length);
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
- // Show the garden artwork once at its natural aspect ratio; extend the lower rows with a clean lawn.
- if(gardenBackground.complete&&gardenBackground.naturalWidth){
-  const im=gardenBackground,sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
-  ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
-  drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
-  blendGardenIntoLawn(ctx,W,H,sceneH);
- }else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
+ // Layer the garden over a continuous lawn base and alpha-fade its lower edge.
+ drawResponsiveGardenBackground(ctx,W,H,31415);
  // Subtle petals and sparkles float over the garden artwork.
  for(let i=0;i<55;i++){ctx.fillStyle=['#fff0cf','#f6cbd4','#f4e2a7','#d9ebc9'][i%4];ctx.globalAlpha=.75;ctx.fillRect((i*197+47)%W,(i*113+31)%H,5,5)}ctx.globalAlpha=1;
  if(showTitle){
@@ -756,21 +751,6 @@ function portraitCanvasSize(){
 }
 
 
-function blendGardenIntoLawn(ctx,W,H,sceneH){
- // Cross-fade the bottom of the illustrated garden into the extended lawn.
- // The long gradient removes the hard horizontal cut without repeating or stretching the garden.
- const fadeTop=Math.max(0,sceneH-155);
- const fadeBottom=Math.min(H,sceneH+95);
- if(fadeBottom<=fadeTop)return;
- const fade=ctx.createLinearGradient(0,fadeTop,0,fadeBottom);
- fade.addColorStop(0,'rgba(185,217,111,0)');
- fade.addColorStop(.42,'rgba(185,217,111,.12)');
- fade.addColorStop(.72,'rgba(185,217,111,.58)');
- fade.addColorStop(1,'rgba(185,217,111,.96)');
- ctx.fillStyle=fade;
- ctx.fillRect(0,fadeTop,W,fadeBottom-fadeTop);
-}
-
 function drawNaturalGrassExtension(ctx,W,H,startY,seed=2718){
  if(H<=startY)return;
  const h=H-startY;
@@ -832,19 +812,9 @@ function drawPortraitFrame(now,elapsed,revealAll=false){
  const size=portraitCanvasSize();
  if(c.width!==size.width||c.height!==size.height){c.width=size.width;c.height=size.height;}
  const W=c.width,H=c.height,cols=portraitMotion.cols,cellW=portraitMotion.cellW,cellH=portraitMotion.cellH;
- // Show the original garden illustration once, scaled proportionally to the canvas width.
- // Below it, draw a fresh continuous lawn (not a stretched or repeated crop).
+ // Layer the garden over a continuous lawn base and alpha-fade its lower edge.
  ctx.clearRect(0,0,W,H);
- if(gardenBackground.complete&&gardenBackground.naturalWidth){
-   const im=gardenBackground;
-   const sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
-   ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
-   drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
-   blendGardenIntoLawn(ctx,W,H,sceneH);
- }else{
-   const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
-   ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
- }
+ drawResponsiveGardenBackground(ctx,W,H,31415);
  ctx.fillStyle='rgba(28,35,50,.18)';ctx.fillRect(0,0,W,H);
  // Soft floating sparkle accents; positions change every frame.
  for(let i=0;i<30;i++){
