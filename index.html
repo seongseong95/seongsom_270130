@@ -806,6 +806,56 @@ function drawNaturalGrassExtension(ctx,W,H,startY,seed=2718){
  ctx.globalAlpha=1;
 }
 
+
+// Draw the original garden once over a continuous lawn base.
+// The garden image uses a cached alpha mask that fades only its lower edge,
+// so the transition is genuinely blended rather than a hard horizontal cut.
+let __gardenFadeLayer = null;
+let __gardenFadeSource = null;
+function drawResponsiveGardenBackground(ctx, W, H, seed = 31415) {
+  const im = gardenBackground;
+  // Always paint a valid base first, even while the embedded image is loading.
+  drawNaturalGrassExtension(ctx, W, H, 0, seed);
+
+  if (!im || !im.complete || !im.naturalWidth || !im.naturalHeight) return;
+
+  if (
+    !__gardenFadeLayer ||
+    __gardenFadeSource !== im ||
+    __gardenFadeLayer.width !== im.naturalWidth ||
+    __gardenFadeLayer.height !== im.naturalHeight
+  ) {
+    const layer = document.createElement('canvas');
+    layer.width = im.naturalWidth;
+    layer.height = im.naturalHeight;
+    const layerCtx = layer.getContext('2d');
+    layerCtx.drawImage(im, 0, 0);
+
+    // Keep the top 58% fully opaque, then gradually dissolve the bottom edge.
+    layerCtx.globalCompositeOperation = 'destination-in';
+    const mask = layerCtx.createLinearGradient(0, 0, 0, layer.height);
+    mask.addColorStop(0, 'rgba(255,255,255,1)');
+    mask.addColorStop(0.58, 'rgba(255,255,255,1)');
+    mask.addColorStop(0.72, 'rgba(255,255,255,0.88)');
+    mask.addColorStop(0.84, 'rgba(255,255,255,0.52)');
+    mask.addColorStop(0.94, 'rgba(255,255,255,0.16)');
+    mask.addColorStop(1, 'rgba(255,255,255,0)');
+    layerCtx.fillStyle = mask;
+    layerCtx.fillRect(0, 0, layer.width, layer.height);
+    layerCtx.globalCompositeOperation = 'source-over';
+
+    __gardenFadeLayer = layer;
+    __gardenFadeSource = im;
+  }
+
+  const sceneH = Math.round(W * im.naturalHeight / im.naturalWidth);
+  ctx.drawImage(
+    __gardenFadeLayer,
+    0, 0, im.naturalWidth, im.naturalHeight,
+    0, 0, W, sceneH
+  );
+}
+
 function drawPortraitFrame(now,elapsed,revealAll=false){
  ensurePortraitViewer();
  const c=viewerCanvas,ctx=c.getContext('2d');
