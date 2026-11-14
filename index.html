@@ -62,6 +62,15 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 .listitem .guestlabel{overflow-wrap:anywhere}
 @media(max-width:760px){.admin-tools input,.admin-tools select{flex:1 1 100%;width:100%}}
 
+
+.character-picker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:8px 0 14px}
+.character-option{background:#fff;border:2px solid #d8c6bd;box-shadow:2px 2px 0 #b79b91;padding:5px 3px;display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0}
+.character-option img{width:100%;max-width:92px;height:105px;object-fit:contain;image-rendering:auto}
+.character-option span{font-size:11px;line-height:1.35;white-space:normal}
+.character-option.selected{border:3px solid #c46e75;background:#fff0f0;box-shadow:2px 2px 0 #8b4854}
+.avatarcanvas{width:150px;height:210px;image-rendering:auto}
+.guesttile canvas{width:76px;height:106px;image-rendering:auto}
+@media(max-width:520px){.character-picker{grid-template-columns:repeat(3,minmax(0,1fr))}.character-option img{height:92px}}
 </style>
 </head>
 <body><div class="ambient" aria-hidden="true">♥　✦　♡　✧　♥</div>
@@ -99,7 +108,9 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
     <div><label for="accessory">액세서리</label><select id="accessory"><option value="none">없음</option><option value="glasses">안경</option><option value="bow">리본</option><option value="crown">왕관</option><option value="flower">꽃</option><option value="cap">모자</option><option value="headband">헤어밴드</option><option value="earring">귀걸이</option></select><label for="expression">표정</label><select id="expression"><option value="smile">기본 미소</option><option value="happy">활짝 웃기</option><option value="wink">윙크</option><option value="surprised">놀란 표정</option></select></div>
     <div><label for="message">축하 메시지 *</label><textarea id="message" maxlength="180" required placeholder="두 분의 결혼을 진심으로 축하해요!"></textarea></div>
    </div>
-   <div class="previewbox"><canvas id="avatarPreview" class="avatarcanvas" width="32" height="40" aria-label="캐릭터 미리보기"></canvas><div><div class="previewbubble" id="bubblePreview">축하 메시지가 여기에 표시돼요!</div><p id="previewName" style="font-weight:bold;text-align:center">하객 이름</p></div></div>
+   <label>캐릭터 선택 (고해상도 치비 도트)</label>
+   <div id="characterPicker" class="character-picker" aria-label="캐릭터 선택"></div>
+   <div class="previewbox"><canvas id="avatarPreview" class="avatarcanvas" width="200" height="280" aria-label="캐릭터 미리보기"></canvas><div><div class="previewbubble" id="bubblePreview">축하 메시지가 여기에 표시돼요!</div><p id="previewName" style="font-weight:bold;text-align:center">하객 이름</p></div></div>
    <p class="hint">※ 한 사람당 한 캐릭터를 권장합니다. 링크를 가진 사람은 메시지와 캐릭터를 볼 수 있습니다. 실제 서비스에서는 중복 참여 방지와 신고·관리 기능을 운영하세요.</p>
    <div class="row"><button type="submit" id="submitBtn">캐릭터와 메시지 등록</button><button type="button" class="pink" id="resetAvatar">캐릭터 다시 꾸미기</button></div>
   </form>
@@ -154,10 +165,10 @@ const positions={};let toastTimer;
 const $=id=>document.getElementById(id);
 function toast(s){$('toast').textContent=s;$('toast').classList.remove('hidden');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').classList.add('hidden'),3500)}
 function uid(){return crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(16).slice(2)}
-function getAvatar(){return {gender:$('gender').value,skin:state.skin,hair:$('hair').value,hairColor:state.hair,outfit:$('top').value,outfitColor:state.outfit,accessory:$('accessory').value,expression:$('expression').value}}
-const state={skin:COLORS.skin[0],hair:COLORS.hair[0],outfit:COLORS.outfit[0]};
+function getAvatar(){return {gender:$('gender').value,skin:state.skin,hair:$('hair').value,hairColor:state.hair,outfit:$('top').value,outfitColor:state.outfit,accessory:$('accessory').value,expression:$('expression').value,spriteId:state.spriteId}}
+const state={skin:COLORS.skin[0],hair:COLORS.hair[0],outfit:COLORS.outfit[0],spriteId:0};
 function swatches(id,items,key){const root=$(id);root.replaceChildren();items.forEach(color=>{const b=document.createElement('button');b.type='button';b.className='swatch'+(state[key]===color?' selected':'');b.style.background=color;b.setAttribute('aria-label',color);b.onclick=()=>{state[key]=color;swatches(id,items,key);drawPreview()};root.append(b)})}
-function drawSprite(ctx,x,y,scale,a,outline=true){
+function drawSpriteFallback(ctx,x,y,scale,a,outline=true){
  // 32x40 chibi sprite: oversized head, tiny body, layered hair and expressive face.
  const px=(cx,cy,w,h,c)=>{ctx.fillStyle=c;ctx.fillRect(Math.round(x+cx*scale),Math.round(y+cy*scale),Math.max(1,Math.round(w*scale)),Math.max(1,Math.round(h*scale)))};
  const dark='#342b32',shade='#5a4142',skin=a.skin||COLORS.skin[0],hair=a.hairColor||COLORS.hair[0],cloth=a.outfitColor||COLORS.outfit[0];
@@ -243,11 +254,36 @@ function drawSprite(ctx,x,y,scale,a,outline=true){
  }
 }
 function shadeColor(hex,amount){const n=parseInt(String(hex).replace('#',''),16);if(!Number.isFinite(n))return hex;const r=Math.max(0,Math.min(255,(n>>16)+amount)),g=Math.max(0,Math.min(255,((n>>8)&255)+amount)),b=Math.max(0,Math.min(255,(n&255)+amount));return '#'+((1<<24)+(r<<16)+(g<<8)+b).toString(16).slice(1)}
+
+const characterImages = Array.from({length:16},(_,i)=>{
+ const img=new Image(); img.src=`assets/character-${String(i+1).padStart(2,'0')}.png`;
+ img.onload=()=>{drawPreview();renderWall();if(admin)drawScene($('wallCanvas'),guests,{bubbles:'all'});drawScene($('movieStage'),guests,{bubbles:'all'});};
+ return img;
+});
+function drawSprite(ctx,x,y,scale,a){
+ const idx=Number.isInteger(a?.spriteId)?Math.max(0,Math.min(15,a.spriteId)):((a?.gender==='feminine')?1:0);
+ const img=characterImages[idx];
+ if(img && img.complete && img.naturalWidth){
+   ctx.imageSmoothingEnabled=true;ctx.drawImage(img,x,y,200*scale,280*scale);ctx.imageSmoothingEnabled=false;
+ }else drawSpriteFallback(ctx,x,y,scale,a);
+}
+
+const characterNames=['신랑 정장','신부 웨딩','안경 니트','핑크 웨이브','베레모','헤드폰','플라워 햇','캐주얼 캡','한복 남','핑크 한복','트렌치 코트','체크 스커트','블론드 원피스','헤드폰 후드','리본 드레스','블랙 정장'];
+function renderCharacterPicker(){
+ const root=$('characterPicker');if(!root)return;root.replaceChildren();
+ characterImages.forEach((img,i)=>{
+  const b=document.createElement('button');b.type='button';b.className='character-option'+(state.spriteId===i?' selected':'');
+  const thumb=document.createElement('img');thumb.src=img.src;thumb.alt=characterNames[i];thumb.loading='lazy';
+  const name=document.createElement('span');name.textContent=characterNames[i];b.append(thumb,name);
+  b.onclick=()=>{state.spriteId=i;root.querySelectorAll('.character-option').forEach((el,j)=>el.classList.toggle('selected',j===i));drawPreview()};
+  root.append(b);
+ });
+}
 function drawPreview(){const c=$('avatarPreview'),ctx=c.getContext('2d');ctx.clearRect(0,0,c.width,c.height);ctx.imageSmoothingEnabled=false;drawSprite(ctx,0,0,1,getAvatar());$('bubblePreview').textContent=$('message').value||'축하 메시지가 여기에 표시돼요!';$('previewName').textContent=$('guestName').value||'하객 이름'}
 ['guestName','message'].forEach(id=>$(id).addEventListener('input',drawPreview));
 ['gender','hair','top','accessory','expression'].forEach(id=>{ $(id).addEventListener('input',drawPreview); $(id).addEventListener('change',drawPreview); });
 function normalized(g){return {id:g.id||uid(),name:g.name||'하객',message:g.message||'',avatar:g.avatar||getAvatar(),created_at:g.created_at||new Date().toISOString(),x:g.x??null,y:g.y??null}}
-function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=32;c.height=40;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
+function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';b.textContent=g.message;const c=document.createElement('canvas');c.width=200;c.height=280;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
 function canvasCtx(c){const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;return ctx}
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
@@ -270,8 +306,8 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
  for(let i=0;i<90;i++){ctx.fillStyle=['#e8dcbf','#d7e4cb','#f1d4d0','#d5e6ee'][i%4];ctx.fillRect((i*197+47)%W,(i*113+31)%H,7,7)}
  if(showTitle){ctx.fillStyle='#fff0cf';ctx.textAlign='center';ctx.font='bold 35px "Gowun Dodum",sans-serif';ctx.fillText('윤성 ♥ 소미의 결혼을 축하합니다',W/2,64);ctx.font='20px "Gowun Dodum",sans-serif';ctx.fillText('OUR PIXEL GUESTBOOK · 2027.01.30',W/2,94)}
  // Static bride and groom on the stage. The five experimental action animations have been removed.
- drawSprite(ctx,Math.round(W*.465-24),Math.round(H*.30),1.9,{gender:'masculine',skin:'#f1c6a5',hair:'short',hairColor:'#302a2b',outfit:'suit',outfitColor:'#343c50',accessory:'none'});
- drawSprite(ctx,Math.round(W*.535-24),Math.round(H*.30),1.9,{gender:'feminine',skin:'#f7d7b5',hair:'long',hairColor:'#67432f',outfit:'dress',outfitColor:'#fff0d1',accessory:'flower'});
+ drawSprite(ctx,Math.round(W*.465-42),Math.round(H*.30-45),0.42,{gender:'masculine',skin:'#f1c6a5',hair:'short',hairColor:'#302a2b',outfit:'suit',outfitColor:'#343c50',accessory:'none'});
+ drawSprite(ctx,Math.round(W*.535-42),Math.round(H*.30-45),0.42,{gender:'feminine',skin:'#f7d7b5',hair:'long',hairColor:'#67432f',outfit:'dress',outfitColor:'#fff0d1',accessory:'flower'});
  ctx.fillStyle='#fff0cf';ctx.font='bold 17px "Gowun Dodum",sans-serif';ctx.textAlign='center';ctx.fillText('윤성 ♥ 소미',W*.5,H*.30+88);
  const top=showTitle?Math.round(H*.53):Math.round(H*.49), cols=Math.max(1,Math.floor(W/150)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
  items.forEach((g,i)=>{
@@ -296,7 +332,7 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
   ctx.save();
   ctx.translate(x,y+30);
   ctx.rotate(walkLean);
-  drawSprite(ctx,-36, -30,1.5,g.avatar);
+  drawSprite(ctx,-42, -72,0.42,g.avatar);
   ctx.restore();
   ctx.textAlign='center';ctx.fillStyle='#30332d';ctx.font='bold 16px "Gowun Dodum",sans-serif';ctx.fillText(g.name,x,y+72,cellW-10);
  });
@@ -330,7 +366,7 @@ function seedPreview(){guests=[normalized({id:'demo1',name:'민지',message:'두
 async function loadGuests(){if(!db){seedPreview();return}const localPositions=new Map(guests.map(g=>[String(g.id),{x:g.x,y:g.y}]));const keepLocalPositions=admin&&layoutDirty;const settingResult=await db.from('wedding_settings').select('submissions_open').eq('id',1).maybeSingle();if(!settingResult.error&&settingResult.data){submissionsOpen=settingResult.data.submissions_open;$('subStatus').textContent='참여 상태: '+(submissionsOpen?'열림':'마감')}const {data,error}=await db.from('wedding_guests').select('id,name,message,avatar,created_at,x,y').order('created_at',{ascending:true}).limit(1000);if(error){toast('데이터를 불러오지 못했습니다. 설정을 확인해주세요.');console.error(error);return}guests=(data||[]).map(row=>{const g=normalized(row),p=localPositions.get(String(g.id));return keepLocalPositions&&p&&p.x!=null&&p.y!=null?{...g,x:p.x,y:p.y}:g});$('syncState').textContent='실시간 연결';renderWall();if(admin){drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()}drawScene($('movieStage'),guests,{bubbles:'all'})}
 $('guestForm').onsubmit=async e=>{e.preventDefault();if(!submissionsOpen){toast('축하 메시지 접수가 마감되었습니다.');return}const name=$('guestName').value.trim(),message=$('message').value.trim();if(!name||!message)return;if(!db){toast('미리보기 모드입니다. README 설정 후 실제 등록이 가능합니다.');return}
  const btn=$('submitBtn');btn.disabled=true;const {error}=await db.from('wedding_guests').insert({name,message,avatar:getAvatar()});btn.disabled=false;if(error){toast(error.message&&error.message.includes('submissions are closed')?'축하 메시지 접수가 마감되었습니다.':'등록에 실패했습니다. 잠시 후 다시 시도해주세요.');console.error(error);return}toast('캐릭터와 축하 메시지를 등록했어요 ♥');e.target.reset();drawPreview();await loadGuests();showTab('wall')};
-$('resetAvatar').onclick=()=>{state.skin=COLORS.skin[0];state.hair=COLORS.hair[0];state.outfit=COLORS.outfit[0];swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');$('gender').value='neutral';$('hair').value='short';$('top').value='tee';$('accessory').value='none';$('expression').value='smile';drawPreview()};
+$('resetAvatar').onclick=()=>{state.skin=COLORS.skin[0];state.hair=COLORS.hair[0];state.outfit=COLORS.outfit[0];state.spriteId=0;renderCharacterPicker();renderCharacterPicker();swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');$('gender').value='neutral';$('hair').value='short';$('top').value='tee';$('accessory').value='none';$('expression').value='smile';drawPreview()};
 $('loginBtn').onclick=async()=>{if(!db){toast('Supabase 설정을 먼저 완료해주세요.');return}const {error}=await db.auth.signInWithPassword({email:$('adminEmail').value,password:$('adminPassword').value});if(error){toast('로그인 실패: 계정을 확인해주세요.');return}const {data}=await db.from('wedding_admins').select('user_id').eq('user_id',(await db.auth.getUser()).data.user.id).maybeSingle();if(!data){await db.auth.signOut();toast('이 계정은 관리자 권한이 없습니다.');return}admin=true;$('adminLogin').classList.add('hidden');$('adminControls').classList.remove('hidden');$('exportControls').classList.remove('hidden');$('export').querySelector('.panel').classList.remove('viewer-mode');toast('관리자 로그인 완료');drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()};
 $('logoutBtn').onclick=async()=>{await db?.auth.signOut();admin=false;$('adminLogin').classList.remove('hidden');$('adminControls').classList.add('hidden');$('exportControls').classList.add('hidden');$('export').querySelector('.panel').classList.add('viewer-mode');toast('로그아웃했습니다.')};
 $('autoArrange').onclick=()=>{arrange();toast('자동 정렬 완료')};
@@ -369,7 +405,7 @@ $('exportVideo').onclick=async()=>{
 };
 $('stopVideo').onclick=()=>{if(!admin)return;stopRequested=true;if(recorder&&recorder.state!=='inactive')recorder.stop()};
 $('fullscreenStage').onclick=async()=>{if(!admin){toast('관리자 로그인 후 이용할 수 있습니다.');return}const c=$('movieStage');try{if(document.fullscreenElement){await document.exitFullscreen()}else if(c.requestFullscreen){await c.requestFullscreen()}else{toast('이 브라우저에서는 전체 화면을 지원하지 않습니다.')}}catch(e){toast('전체 화면 전환에 실패했습니다. 브라우저 권한을 확인해주세요.')}};
-swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');drawPreview();
+renderCharacterPicker();swatches('skinSwatches',COLORS.skin,'skin');swatches('hairSwatches',COLORS.hair,'hair');swatches('outfitSwatches',COLORS.outfit,'outfit');drawPreview();
 $('exportControls').classList.add('hidden');$('export').querySelector('.panel').classList.add('viewer-mode');
 // Continuous animation loop keeps the wedding couple and guest sprites moving on the canvases.
 function animateScenes(){
