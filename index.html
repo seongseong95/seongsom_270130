@@ -342,12 +342,12 @@ body.mobile-stage-fullscreen #movieStage {
 
 
 /* Portrait full-screen guestbook poster, inspired by the supplied mobile reference recording. */
-#mobileGuestbookViewer{display:none;position:fixed;inset:0;z-index:100000;background:#10131b;color:#fff;overflow:hidden}
+#mobileGuestbookViewer{display:none;position:fixed;inset:0;z-index:100000;background:transparent;color:#fff;overflow:hidden}
 #mobileGuestbookViewer.open{display:flex;flex-direction:column}
 #mobileGuestbookViewer #closeMobileViewer{position:absolute;z-index:3;top:calc(env(safe-area-inset-top, 0px) + 10px);right:12px;min-height:40px;padding:6px 13px;background:#fffaf0;color:#292b27;border:2px solid #292b27;box-shadow:2px 2px 0 #292b27;font-weight:bold}
 #mobileGuestbookViewer .mobile-viewer-scroll{width:100%;height:100%;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:56px 10px 24px}
 #mobileGuestbookViewer canvas{display:block;width:min(100%,520px);height:auto;margin:0 auto;background:#182337;box-shadow:0 0 0 3px #d5b76c}
-#mobileGuestbookViewer.fallback-fullscreen{display:flex;position:fixed;inset:0;width:100vw;height:100vh;height:100dvh}
+#mobileGuestbookViewer.fallback-fullscreen{display:flex;position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;background:transparent}
 @media(min-width:761px){#mobileGuestbookViewer{display:none!important}}
 
 </style>
