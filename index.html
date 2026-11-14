@@ -636,15 +636,18 @@ function fitSceneCanvasHeight(canvas,itemCount){
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
  fitSceneCanvasHeight(canvas,items.length);
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
- // Keep the original garden artwork at its natural aspect ratio; extend extra rows with a grass-only crop.
+ // Keep the full garden once at its natural aspect ratio, then continue with one seamless grass extension.
  if(gardenBackground.complete&&gardenBackground.naturalWidth){
   const im=gardenBackground,sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
   ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
-  const cropX=Math.round(im.naturalWidth*.17),cropY=Math.round(im.naturalHeight*.34);
-  const cropW=Math.round(im.naturalWidth*.66),cropH=Math.round(im.naturalHeight*.43);
-  const tileH=Math.max(1,Math.round(W*cropH/cropW));
-  for(let y=sceneH;y<H;y+=tileH){
-    ctx.drawImage(im,cropX,cropY,cropW,cropH,0,y,W,Math.min(tileH,H-y));
+  if(H>sceneH){
+   const sx=Math.round(im.naturalWidth*.18),sy=Math.round(im.naturalHeight*.53);
+   const sw=Math.round(im.naturalWidth*.64),sh=Math.round(im.naturalHeight*.42);
+   ctx.drawImage(im,sx,sy,sw,sh,0,sceneH,W,H-sceneH);
+   const blend=ctx.createLinearGradient(0,sceneH-12,0,sceneH+100);
+   blend.addColorStop(0,'rgba(190,220,112,0)');
+   blend.addColorStop(1,'rgba(190,220,112,.10)');
+   ctx.fillStyle=blend;ctx.fillRect(0,sceneH-12,W,112);
   }
  }else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
  // Subtle petals and sparkles float over the garden artwork.
@@ -764,19 +767,21 @@ function drawPortraitFrame(now,elapsed,revealAll=false){
  const size=portraitCanvasSize();
  if(c.width!==size.width||c.height!==size.height){c.width=size.width;c.height=size.height;}
  const W=c.width,H=c.height,cols=portraitMotion.cols,cellW=portraitMotion.cellW,cellH=portraitMotion.cellH;
- // Fit the complete wedding garden to the mobile canvas width. Extend long pages with a grass-only crop,
- // rather than stretching the whole garden scene vertically (which caused the extreme zoom in mobile screenshots).
+ // Fit the complete garden once at its natural aspect ratio. For the long mobile canvas,
+ // stretch one clean grass-only source area continuously below it; never tile/repeat the garden.
  ctx.clearRect(0,0,W,H);
  if(gardenBackground.complete&&gardenBackground.naturalWidth){
    const im=gardenBackground;
    const sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
    ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
-   const cropX=Math.round(im.naturalWidth*.17),cropY=Math.round(im.naturalHeight*.34);
-   const cropW=Math.round(im.naturalWidth*.66),cropH=Math.round(im.naturalHeight*.43);
-   const tileH=Math.max(1,Math.round(W*cropH/cropW));
-   for(let y=sceneH;y<H;y+=tileH){
-     const drawH=Math.min(tileH,H-y);
-     ctx.drawImage(im,cropX,cropY,cropW,cropH,0,y,W,drawH);
+   if(H>sceneH){
+     const sx=Math.round(im.naturalWidth*.18),sy=Math.round(im.naturalHeight*.53);
+     const sw=Math.round(im.naturalWidth*.64),sh=Math.round(im.naturalHeight*.42);
+     ctx.drawImage(im,sx,sy,sw,sh,0,sceneH,W,H-sceneH);
+     const blend=ctx.createLinearGradient(0,sceneH-12,0,sceneH+100);
+     blend.addColorStop(0,'rgba(190,220,112,0)');
+     blend.addColorStop(1,'rgba(190,220,112,.10)');
+     ctx.fillStyle=blend;ctx.fillRect(0,sceneH-12,W,112);
    }
  }else{
    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
