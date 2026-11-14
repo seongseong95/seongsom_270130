@@ -636,8 +636,13 @@ function fitSceneCanvasHeight(canvas,itemCount){
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
  fitSceneCanvasHeight(canvas,items.length);
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
- // Layer the garden over a continuous lawn base and alpha-fade its lower edge.
- drawResponsiveGardenBackground(ctx,W,H,31415);
+ // Show the garden artwork once at its natural aspect ratio; extend the lower rows with a clean lawn.
+ if(gardenBackground.complete&&gardenBackground.naturalWidth){
+  const im=gardenBackground,sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
+  ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
+  drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
+  blendGardenIntoLawn(ctx,W,H,sceneH);
+ }else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
  // Subtle petals and sparkles float over the garden artwork.
  for(let i=0;i<55;i++){ctx.fillStyle=['#fff0cf','#f6cbd4','#f4e2a7','#d9ebc9'][i%4];ctx.globalAlpha=.75;ctx.fillRect((i*197+47)%W,(i*113+31)%H,5,5)}ctx.globalAlpha=1;
  if(showTitle){
@@ -751,6 +756,21 @@ function portraitCanvasSize(){
 }
 
 
+function blendGardenIntoLawn(ctx,W,H,sceneH){
+ // Cross-fade the bottom of the illustrated garden into the extended lawn.
+ // The long gradient removes the hard horizontal cut without repeating or stretching the garden.
+ const fadeTop=Math.max(0,sceneH-155);
+ const fadeBottom=Math.min(H,sceneH+95);
+ if(fadeBottom<=fadeTop)return;
+ const fade=ctx.createLinearGradient(0,fadeTop,0,fadeBottom);
+ fade.addColorStop(0,'rgba(185,217,111,0)');
+ fade.addColorStop(.42,'rgba(185,217,111,.12)');
+ fade.addColorStop(.72,'rgba(185,217,111,.58)');
+ fade.addColorStop(1,'rgba(185,217,111,.96)');
+ ctx.fillStyle=fade;
+ ctx.fillRect(0,fadeTop,W,fadeBottom-fadeTop);
+}
+
 function drawNaturalGrassExtension(ctx,W,H,startY,seed=2718){
  if(H<=startY)return;
  const h=H-startY;
@@ -806,65 +826,25 @@ function drawNaturalGrassExtension(ctx,W,H,startY,seed=2718){
  ctx.globalAlpha=1;
 }
 
-
-// Draw the original garden once over a continuous lawn base.
-// The garden image uses a cached alpha mask that fades only its lower edge,
-// so the transition is genuinely blended rather than a hard horizontal cut.
-let __gardenFadeLayer = null;
-let __gardenFadeSource = null;
-function drawResponsiveGardenBackground(ctx, W, H, seed = 31415) {
-  const im = gardenBackground;
-  // Always paint a valid base first, even while the embedded image is loading.
-  drawNaturalGrassExtension(ctx, W, H, 0, seed);
-
-  if (!im || !im.complete || !im.naturalWidth || !im.naturalHeight) return;
-
-  if (
-    !__gardenFadeLayer ||
-    __gardenFadeSource !== im ||
-    __gardenFadeLayer.width !== im.naturalWidth ||
-    __gardenFadeLayer.height !== im.naturalHeight
-  ) {
-    const layer = document.createElement('canvas');
-    layer.width = im.naturalWidth;
-    layer.height = im.naturalHeight;
-    const layerCtx = layer.getContext('2d');
-    layerCtx.drawImage(im, 0, 0);
-
-    // Keep the top 58% fully opaque, then gradually dissolve the bottom edge.
-    layerCtx.globalCompositeOperation = 'destination-in';
-    const mask = layerCtx.createLinearGradient(0, 0, 0, layer.height);
-    mask.addColorStop(0, 'rgba(255,255,255,1)');
-    mask.addColorStop(0.58, 'rgba(255,255,255,1)');
-    mask.addColorStop(0.72, 'rgba(255,255,255,0.88)');
-    mask.addColorStop(0.84, 'rgba(255,255,255,0.52)');
-    mask.addColorStop(0.94, 'rgba(255,255,255,0.16)');
-    mask.addColorStop(1, 'rgba(255,255,255,0)');
-    layerCtx.fillStyle = mask;
-    layerCtx.fillRect(0, 0, layer.width, layer.height);
-    layerCtx.globalCompositeOperation = 'source-over';
-
-    __gardenFadeLayer = layer;
-    __gardenFadeSource = im;
-  }
-
-  const sceneH = Math.round(W * im.naturalHeight / im.naturalWidth);
-  ctx.drawImage(
-    __gardenFadeLayer,
-    0, 0, im.naturalWidth, im.naturalHeight,
-    0, 0, W, sceneH
-  );
-}
-
 function drawPortraitFrame(now,elapsed,revealAll=false){
  ensurePortraitViewer();
  const c=viewerCanvas,ctx=c.getContext('2d');
  const size=portraitCanvasSize();
  if(c.width!==size.width||c.height!==size.height){c.width=size.width;c.height=size.height;}
  const W=c.width,H=c.height,cols=portraitMotion.cols,cellW=portraitMotion.cellW,cellH=portraitMotion.cellH;
- // Layer the garden over a continuous lawn base and alpha-fade its lower edge.
+ // Show the original garden illustration once, scaled proportionally to the canvas width.
+ // Below it, draw a fresh continuous lawn (not a stretched or repeated crop).
  ctx.clearRect(0,0,W,H);
- drawResponsiveGardenBackground(ctx,W,H,31415);
+ if(gardenBackground.complete&&gardenBackground.naturalWidth){
+   const im=gardenBackground;
+   const sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
+   ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
+   drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
+   blendGardenIntoLawn(ctx,W,H,sceneH);
+ }else{
+   const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
+   ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
+ }
  ctx.fillStyle='rgba(28,35,50,.18)';ctx.fillRect(0,0,W,H);
  // Soft floating sparkle accents; positions change every frame.
  for(let i=0;i<30;i++){
