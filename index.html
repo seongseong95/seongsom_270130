@@ -346,7 +346,7 @@ body.mobile-stage-fullscreen #movieStage {
 #mobileGuestbookViewer.open{display:flex;flex-direction:column}
 #mobileGuestbookViewer #closeMobileViewer{position:absolute;z-index:3;top:calc(env(safe-area-inset-top, 0px) + 10px);right:12px;min-height:40px;padding:6px 13px;background:#fffaf0;color:#292b27;border:2px solid #292b27;box-shadow:2px 2px 0 #292b27;font-weight:bold}
 #mobileGuestbookViewer .mobile-viewer-scroll{width:100%;height:100%;overflow:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:56px 10px 24px}
-#mobileGuestbookViewer canvas{display:block;width:min(100%,520px);height:auto;margin:0 auto;background:#182337;box-shadow:0 0 0 3px #d5b76c}
+#mobileGuestbookViewer canvas{display:block;width:min(100%,520px);height:auto;margin:0 auto;background:transparent;box-shadow:0 0 0 3px #d5b76c}
 #mobileGuestbookViewer.fallback-fullscreen{display:flex;position:fixed;inset:0;width:100vw;height:100vh;height:100dvh;background:transparent}
 @media(min-width:761px){#mobileGuestbookViewer{display:none!important}}
 
@@ -614,10 +614,39 @@ function normalized(g){return {id:g.id||uid(),name:g.name||'하객',message:g.me
 function renderWall(){const root=$('guestWall');root.replaceChildren();$('guestCount').textContent=`참여 ${guests.length}명`;guests.forEach(g=>{const tile=document.createElement('div');tile.className='guesttile';const b=document.createElement('div');b.className='bubble';const bm=bubbleLayout(g.message||'',200);b.textContent=bm.lines.join('\n');b.style.width=bm.width+'px';b.style.minHeight=bm.height+'px';const c=document.createElement('canvas');c.width=200;c.height=280;c.getContext('2d').imageSmoothingEnabled=false;drawSprite(c.getContext('2d'),0,0,1,g.avatar);const n=document.createElement('div');n.className='guestname';n.textContent=g.name;tile.append(b,c,n);root.append(tile)})}
 function canvasCtx(c){const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;return ctx}
 const gardenBackground=new Image();gardenBackground.src=EMBEDDED_ASSETS['garden-background'];gardenBackground.onerror=()=>console.error('정원 배경 이미지 로드 실패');gardenBackground.onload=()=>{if($('movieStage'))drawScene($('movieStage'),guests,{bubbles:'all'});if(admin&&$('wallCanvas'))drawScene($('wallCanvas'),guests,{bubbles:'all'});};
+function fitSceneCanvasHeight(canvas,itemCount){
+ if(!canvas || (canvas.id!=='wallCanvas' && canvas.id!=='movieStage'))return;
+ const W=canvas.width||1920,cols=Math.max(1,Math.floor(W/220));
+ const rows=Math.max(1,Math.ceil(itemCount/cols));
+ const baseTop=570,rowHeight=160,bottomPad=100;
+ const targetHeight=Math.max(1080,baseTop+rows*rowHeight+bottomPad);
+ if(canvas.height!==targetHeight){
+   const oldHeight=canvas.height||1080;
+   // Keep manually saved guest positions at the same pixel coordinates after the canvas grows.
+   if(canvas.id==='wallCanvas' && Array.isArray(guests)){
+     guests.forEach(g=>{
+       if(g.y!==null&&g.y!==undefined&&Number.isFinite(Number(g.y))){
+         g.y=Number(g.y)*oldHeight/targetHeight;
+       }
+     });
+   }
+   canvas.height=targetHeight;
+ }
+}
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
+ fitSceneCanvasHeight(canvas,items.length);
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
- // Romantic garden wedding background, with live guest sprites and message bubbles layered above it.
- if(gardenBackground.complete&&gardenBackground.naturalWidth)ctx.drawImage(gardenBackground,0,0,W,H);else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
+ // Keep the original garden artwork at its natural aspect ratio; extend extra rows with a grass-only crop.
+ if(gardenBackground.complete&&gardenBackground.naturalWidth){
+  const im=gardenBackground,sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
+  ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
+  const cropX=Math.round(im.naturalWidth*.17),cropY=Math.round(im.naturalHeight*.34);
+  const cropW=Math.round(im.naturalWidth*.66),cropH=Math.round(im.naturalHeight*.43);
+  const tileH=Math.max(1,Math.round(W*cropH/cropW));
+  for(let y=sceneH;y<H;y+=tileH){
+    ctx.drawImage(im,cropX,cropY,cropW,cropH,0,y,W,Math.min(tileH,H-y));
+  }
+ }else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
  // Subtle petals and sparkles float over the garden artwork.
  for(let i=0;i<55;i++){ctx.fillStyle=['#fff0cf','#f6cbd4','#f4e2a7','#d9ebc9'][i%4];ctx.globalAlpha=.75;ctx.fillRect((i*197+47)%W,(i*113+31)%H,5,5)}ctx.globalAlpha=1;
  if(showTitle){
@@ -629,7 +658,7 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
  }
  // Dedicated high-detail couple sprites: black tuxedo groom and white bridal dress with tiara.
  const groomImg=assetImage('couple-groom'),brideImg=assetImage('couple-bride');
- const coupleY=Math.round(H*.30-60),coupleH=140;
+ const coupleY=Math.round(Math.min(H,1080)*.30-60),coupleH=140;
  if(groomImg&&groomImg.complete&&groomImg.naturalWidth){
    const gh=coupleH,gw=gh*groomImg.naturalWidth/groomImg.naturalHeight;
    ctx.drawImage(groomImg,Math.round(W*.465-gw/2),coupleY,gw,gh);
@@ -642,7 +671,7 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
  ctx.lineWidth=5;ctx.strokeStyle='#fff8ec';ctx.fillStyle='#573047';
  ctx.strokeText('신랑 윤성',W*.465,coupleY+coupleH+24);ctx.fillText('신랑 윤성',W*.465,coupleY+coupleH+24);
  ctx.strokeText('신부 소미',W*.535,coupleY+coupleH+24);ctx.fillText('신부 소미',W*.535,coupleY+coupleH+24);
- const top=showTitle?Math.round(H*.53):Math.round(H*.49), cols=Math.max(1,Math.floor(W/220)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
+ const top=showTitle?Math.round(Math.min(H,1080)*.53):Math.round(Math.min(H,1080)*.49), cols=Math.max(1,Math.floor(W/220)), cellW=W/cols, rows=Math.ceil(items.length/cols), cellH=Math.max(130,Math.min(205,(H-top-50)/Math.max(1,rows)));
  items.forEach((g,i)=>{
   if(active>=0 && bubbles==='sequence' && i!==active){} // still draw all avatars
   const col=i%cols,row=Math.floor(i/cols),cx=col*cellW+cellW/2,cy=top+row*cellH;
@@ -697,12 +726,14 @@ function updateAdminDashboard(){
  const st=$('layoutState');if(st)st.textContent='배치 상태: '+(layoutDirty?'저장되지 않은 변경':'저장됨');
 }
 function ensureMissingPositions(){
- const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/145)),rows=Math.max(1,Math.ceil(guests.length/cols));
+ const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/220)),rows=Math.max(1,Math.ceil(guests.length/cols));
+ fitSceneCanvasHeight(c,guests.length);
+ const top=570,rowH=160;
  let changed=false;
- guests=guests.map((g,i)=>{if(Number.isFinite(Number(g.x))&&g.x!==null&&Number.isFinite(Number(g.y))&&g.y!==null)return g;const row=Math.floor(i/cols),y=rows<=1?.72:.41+row*(.31/(rows-1));changed=true;return {...g,x:(i%cols+.5)/cols,y};});
+ guests=guests.map((g,i)=>{if(Number.isFinite(Number(g.x))&&g.x!==null&&Number.isFinite(Number(g.y))&&g.y!==null)return g;const row=Math.floor(i/cols),y=(top+row*rowH)/c.height;changed=true;return {...g,x:(i%cols+.5)/cols,y};});
  if(changed)markLayoutDirty();
 }
-function arrange(){const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/145)),rows=Math.ceil(guests.length/cols),cellX=1/cols,firstGuestY=.41,lastGuestY=.72;guests=guests.map((g,i)=>{const row=Math.floor(i/cols),y=rows<=1?.72:firstGuestY+row*((lastGuestY-firstGuestY)/(rows-1));return {...g,x:(i%cols+.5)*cellX,y}});markLayoutDirty();drawScene(c,guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()}
+function arrange(){const c=$('wallCanvas'),cols=Math.max(1,Math.floor(c.width/220)),rows=Math.ceil(guests.length/cols),cellX=1/cols,top=570,rowH=160;fitSceneCanvasHeight(c,guests.length);guests=guests.map((g,i)=>{const row=Math.floor(i/cols),y=(top+row*rowH)/c.height;return {...g,x:(i%cols+.5)*cellX,y}});markLayoutDirty();drawScene(c,guests,{bubbles:'all'});renderAdminList();updateAdminDashboard()}
 function visibleGuests(){const q=($('guestSearch')?.value||'').trim().toLocaleLowerCase();let list=guests.filter(g=>!q||`${g.name||''} ${g.message||''}`.toLocaleLowerCase().includes(q));const sort=$('guestSort')?.value||'created_asc';list.sort((a,b)=>sort==='created_desc'?new Date(b.created_at||0)-new Date(a.created_at||0):sort==='name_asc'?(a.name||'').localeCompare(b.name||'','ko'):new Date(a.created_at||0)-new Date(b.created_at||0));return list}
 function renderAdminList(){const root=$('adminGuestList');if(!root)return;root.replaceChildren();const shown=visibleGuests();shown.forEach(g=>{const i=guests.findIndex(x=>x.id===g.id);const row=document.createElement('div');row.className='listitem';const label=document.createElement('label');const cb=document.createElement('input');cb.type='checkbox';cb.checked=selectedGuestIds.has(String(g.id));cb.setAttribute('aria-label',`${g.name} 선택`);cb.onchange=()=>{if(cb.checked)selectedGuestIds.add(String(g.id));else selectedGuestIds.delete(String(g.id));updateSelectionStatus()};const desc=document.createElement('span');desc.className='guestlabel';desc.textContent=`${i+1}. ${g.name}`;const time=document.createElement('small');time.className='smallmeta';time.textContent=g.created_at?new Date(g.created_at).toLocaleString('ko-KR'):'등록 시간 없음';desc.append(document.createElement('br'),time);desc.title=g.message||'';label.append(cb,desc);const btns=document.createElement('div');btns.className='miniBtns';[['↑',-1],['↓',1]].forEach(([txt,delta])=>{const b=document.createElement('button');b.type='button';b.textContent=txt;b.title=delta<0?'목록 순서 위로':'목록 순서 아래로';b.onclick=()=>{const j=i+delta;if(j<0||j>=guests.length)return;[guests[i],guests[j]]=[guests[j],guests[i]];markLayoutDirty();drawScene($('wallCanvas'),guests,{bubbles:'all'});renderAdminList()};btns.append(b)});const del=document.createElement('button');del.type='button';del.textContent='삭제';del.className='pink';del.title='이 메시지 삭제';del.onclick=async()=>{if(!admin||!db){toast('관리자 로그인 후 이용해주세요.');return}if(!confirm(`'${g.name}'님의 축하 메시지를 삭제할까요? 삭제 후 복구할 수 없습니다.\n\n${g.message}`))return;del.disabled=true;const {error}=await db.from('wedding_guests').delete().eq('id',g.id);if(error){del.disabled=false;toast('삭제 실패: 관리자 권한 또는 Supabase 정책을 확인해주세요.');console.error(error);return}guests=guests.filter(item=>item.id!==g.id);selectedGuestIds.delete(String(g.id));renderWall();drawScene($('wallCanvas'),guests,{bubbles:'all'});drawScene($('movieStage'),guests,{bubbles:'all'});renderAdminList();updateAdminDashboard();toast('메시지를 삭제했습니다. 다른 접속자 화면에도 반영됩니다.');};btns.append(del);row.append(label,btns);root.append(row)});updateSelectionStatus();updateAdminDashboard()}
 function updateSelectionStatus(){const el=$('selectionStatus');if(el)el.textContent=`선택된 하객: ${selectedGuestIds.size}명`}
@@ -725,7 +756,7 @@ let viewerAnimationToken=0,viewerRaf=0,viewerStartedAt=0;
 const portraitMotion={cols:3,cellW:300,cellH:310,headerH:360,footerH:120};
 function portraitCanvasSize(){
  const rows=Math.ceil(guests.length/portraitMotion.cols);
- return {width:900,height:Math.max(1250,portraitMotion.headerH+rows*portraitMotion.cellH+portraitMotion.footerH)};
+ return {width:900,height:Math.max(1250,portraitMotion.headerH+205+rows*portraitMotion.cellH+portraitMotion.footerH+90)};
 }
 function drawPortraitFrame(now,elapsed,revealAll=false){
  ensurePortraitViewer();
@@ -733,12 +764,20 @@ function drawPortraitFrame(now,elapsed,revealAll=false){
  const size=portraitCanvasSize();
  if(c.width!==size.width||c.height!==size.height){c.width=size.width;c.height=size.height;}
  const W=c.width,H=c.height,cols=portraitMotion.cols,cellW=portraitMotion.cellW,cellH=portraitMotion.cellH;
- // Original illustrated garden artwork is used as a background only; guests are drawn live from their saved avatar data.
+ // Fit the complete wedding garden to the mobile canvas width. Extend long pages with a grass-only crop,
+ // rather than stretching the whole garden scene vertically (which caused the extreme zoom in mobile screenshots).
  ctx.clearRect(0,0,W,H);
  if(gardenBackground.complete&&gardenBackground.naturalWidth){
-   const im=gardenBackground,scale=Math.max(W/im.naturalWidth,H/im.naturalHeight);
-   const sw=W/scale,sh=H/scale;
-   ctx.drawImage(im,(im.naturalWidth-sw)/2,(im.naturalHeight-sh)/2,sw,sh,0,0,W,H);
+   const im=gardenBackground;
+   const sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
+   ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
+   const cropX=Math.round(im.naturalWidth*.17),cropY=Math.round(im.naturalHeight*.34);
+   const cropW=Math.round(im.naturalWidth*.66),cropH=Math.round(im.naturalHeight*.43);
+   const tileH=Math.max(1,Math.round(W*cropH/cropW));
+   for(let y=sceneH;y<H;y+=tileH){
+     const drawH=Math.min(tileH,H-y);
+     ctx.drawImage(im,cropX,cropY,cropW,cropH,0,y,W,drawH);
+   }
  }else{
    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
