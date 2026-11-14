@@ -636,19 +636,11 @@ function fitSceneCanvasHeight(canvas,itemCount){
 function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=true}={}){
  fitSceneCanvasHeight(canvas,items.length);
  const ctx=canvasCtx(canvas),W=canvas.width,H=canvas.height;
- // Keep the full garden once at its natural aspect ratio, then continue with one seamless grass extension.
+ // Show the garden artwork once at its natural aspect ratio; extend the lower rows with a clean lawn.
  if(gardenBackground.complete&&gardenBackground.naturalWidth){
   const im=gardenBackground,sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
   ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
-  if(H>sceneH){
-   const sx=Math.round(im.naturalWidth*.18),sy=Math.round(im.naturalHeight*.53);
-   const sw=Math.round(im.naturalWidth*.64),sh=Math.round(im.naturalHeight*.42);
-   ctx.drawImage(im,sx,sy,sw,sh,0,sceneH,W,H-sceneH);
-   const blend=ctx.createLinearGradient(0,sceneH-12,0,sceneH+100);
-   blend.addColorStop(0,'rgba(190,220,112,0)');
-   blend.addColorStop(1,'rgba(190,220,112,.10)');
-   ctx.fillStyle=blend;ctx.fillRect(0,sceneH-12,W,112);
-  }
+  drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
  }else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
  // Subtle petals and sparkles float over the garden artwork.
  for(let i=0;i<55;i++){ctx.fillStyle=['#fff0cf','#f6cbd4','#f4e2a7','#d9ebc9'][i%4];ctx.globalAlpha=.75;ctx.fillRect((i*197+47)%W,(i*113+31)%H,5,5)}ctx.globalAlpha=1;
@@ -761,28 +753,76 @@ function portraitCanvasSize(){
  const rows=Math.ceil(guests.length/portraitMotion.cols);
  return {width:900,height:Math.max(1250,portraitMotion.headerH+205+rows*portraitMotion.cellH+portraitMotion.footerH+90)};
 }
+
+function drawNaturalGrassExtension(ctx,W,H,startY,seed=2718){
+ if(H<=startY)return;
+ const h=H-startY;
+ const g=ctx.createLinearGradient(0,startY,0,H);
+ g.addColorStop(0,'#b9d96f');
+ g.addColorStop(.28,'#b2d268');
+ g.addColorStop(.68,'#a9ca61');
+ g.addColorStop(1,'#9fc15b');
+ ctx.fillStyle=g;ctx.fillRect(0,startY,W,h);
+
+ // Very soft, broad light patches give the lawn depth without repeating the source artwork.
+ for(let i=0;i<7;i++){
+   const x=((i*173+91)%997)/997*W;
+   const y=startY+(((i*239+37)%991)/991)*h;
+   const r=Math.max(45,W*(.10+(i%3)*.035));
+   const glow=ctx.createRadialGradient(x,y,0,x,y,r);
+   glow.addColorStop(0,'rgba(235,242,151,.18)');
+   glow.addColorStop(1,'rgba(235,242,151,0)');
+   ctx.fillStyle=glow;ctx.fillRect(x-r,y-r,r*2,r*2);
+ }
+
+ // Stable pseudo-random flowers and tiny grass flecks; each position is unique and never tiles.
+ let state=seed>>>0;
+ const rand=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296;};
+ const flowerCount=Math.max(24,Math.floor((W*h)/8500));
+ for(let i=0;i<flowerCount;i++){
+   const x=12+rand()*(W-24);
+   const y=startY+18+rand()*Math.max(1,h-36);
+   const r=2+rand()*3.2;
+   const colors=['#fff0d5','#f7d8df','#fff7e6','#f2e6a4'];
+   const color=colors[Math.floor(rand()*colors.length)];
+   ctx.globalAlpha=.35+rand()*.35;
+   ctx.fillStyle=color;
+   for(let p=0;p<5;p++){
+     const a=p*Math.PI*2/5;
+     ctx.beginPath();
+     ctx.arc(x+Math.cos(a)*r*1.2,y+Math.sin(a)*r*1.2,r*.72,0,Math.PI*2);
+     ctx.fill();
+   }
+   ctx.globalAlpha=.55;ctx.fillStyle='#e6b95e';
+   ctx.beginPath();ctx.arc(x,y,r*.42,0,Math.PI*2);ctx.fill();
+ }
+ ctx.globalAlpha=1;
+
+ // Fine, sparse grass strokes.
+ for(let i=0;i<Math.floor(W*h/1100);i++){
+   const x=rand()*W,y=startY+rand()*h;
+   ctx.globalAlpha=.10+rand()*.10;
+   ctx.strokeStyle=rand()>.5?'#668e42':'#e1e98d';
+   ctx.lineWidth=1;
+   ctx.beginPath();ctx.moveTo(x,y+3);ctx.lineTo(x+(rand()-.5)*3,y-2-rand()*3);ctx.stroke();
+ }
+ ctx.globalAlpha=1;
+}
+
 function drawPortraitFrame(now,elapsed,revealAll=false){
  ensurePortraitViewer();
  const c=viewerCanvas,ctx=c.getContext('2d');
  const size=portraitCanvasSize();
  if(c.width!==size.width||c.height!==size.height){c.width=size.width;c.height=size.height;}
  const W=c.width,H=c.height,cols=portraitMotion.cols,cellW=portraitMotion.cellW,cellH=portraitMotion.cellH;
- // Fit the complete garden once at its natural aspect ratio. For the long mobile canvas,
- // stretch one clean grass-only source area continuously below it; never tile/repeat the garden.
+ // Show the original garden illustration once, scaled proportionally to the canvas width.
+ // Below it, draw a fresh continuous lawn (not a stretched or repeated crop).
  ctx.clearRect(0,0,W,H);
  if(gardenBackground.complete&&gardenBackground.naturalWidth){
    const im=gardenBackground;
    const sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
    ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
-   if(H>sceneH){
-     const sx=Math.round(im.naturalWidth*.18),sy=Math.round(im.naturalHeight*.53);
-     const sw=Math.round(im.naturalWidth*.64),sh=Math.round(im.naturalHeight*.42);
-     ctx.drawImage(im,sx,sy,sw,sh,0,sceneH,W,H-sceneH);
-     const blend=ctx.createLinearGradient(0,sceneH-12,0,sceneH+100);
-     blend.addColorStop(0,'rgba(190,220,112,0)');
-     blend.addColorStop(1,'rgba(190,220,112,.10)');
-     ctx.fillStyle=blend;ctx.fillRect(0,sceneH-12,W,112);
-   }
+   drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
  }else{
    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
