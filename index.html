@@ -642,7 +642,6 @@ function drawScene(canvas,items,{bubbles='all',active=-1,showTitle=true,layout=t
   ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
   drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
   blendGardenIntoLawn(ctx,W,H,sceneH);
-   blendGardenIntoLawn(ctx,W,H,sceneH);
  }else{ctx.fillStyle='#b8d88c';ctx.fillRect(0,0,W,H);}
  // Subtle petals and sparkles float over the garden artwork.
  for(let i=0;i<55;i++){ctx.fillStyle=['#fff0cf','#f6cbd4','#f4e2a7','#d9ebc9'][i%4];ctx.globalAlpha=.75;ctx.fillRect((i*197+47)%W,(i*113+31)%H,5,5)}ctx.globalAlpha=1;
@@ -841,6 +840,7 @@ function drawPortraitFrame(now,elapsed,revealAll=false){
    const sceneH=Math.round(W*im.naturalHeight/im.naturalWidth);
    ctx.drawImage(im,0,0,im.naturalWidth,im.naturalHeight,0,0,W,sceneH);
    drawNaturalGrassExtension(ctx,W,H,sceneH,31415);
+   blendGardenIntoLawn(ctx,W,H,sceneH);
  }else{
    const grad=ctx.createLinearGradient(0,0,0,H);grad.addColorStop(0,'#26344b');grad.addColorStop(.35,'#f4d9d2');grad.addColorStop(1,'#b9d88c');
    ctx.fillStyle=grad;ctx.fillRect(0,0,W,H);
