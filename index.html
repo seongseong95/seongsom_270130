@@ -90,6 +90,234 @@ footer{text-align:center;padding:22px 12px 40px;font-size:12px;line-height:1.8;c
 @media(max-width:850px){.customizer-shell{grid-template-columns:1fr}.option-grid{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media(max-width:520px){.option-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.option-btn canvas{height:68px}.stepbar span{font-size:10px;padding:6px 8px}.custom-card{padding:9px}}
 
+
+
+/* Mobile compatibility pass — keeps the desktop layout unchanged. */
+@media (max-width: 600px) {
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  header {
+    padding: 34px 12px 24px;
+  }
+  header:before, header:after {
+    letter-spacing: 9px;
+    font-size: 14px;
+  }
+  .eyebrow {
+    font-size: 7px;
+  }
+  h1 {
+    font-size: clamp(15px, 5vw, 22px);
+    line-height: 1.7;
+  }
+  .subtitle {
+    font-size: 13px;
+  }
+  .couple {
+    font-size: 19px;
+  }
+
+  nav {
+    gap: 8px;
+    padding: 10px 9px;
+  }
+  nav button {
+    flex: 1 1 calc(50% - 8px);
+    min-width: 0;
+    min-height: 42px;
+    padding: 9px 6px;
+    font-size: 13px;
+    white-space: normal;
+  }
+
+  main {
+    width: 100%;
+    padding: 0 12px;
+    margin-bottom: 32px;
+  }
+  .tab {
+    padding-top: 14px;
+  }
+  .panel {
+    padding: 12px;
+    margin-bottom: 14px;
+    box-shadow: 3px 3px 0 var(--line);
+  }
+  h2 {
+    font-size: 11px;
+    overflow-wrap: anywhere;
+  }
+
+  .customizer-shell {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 10px;
+  }
+  .customizer-left,
+  .customizer-right {
+    min-width: 0;
+    gap: 10px;
+  }
+  .custom-card {
+    min-width: 0;
+    padding: 9px;
+  }
+  .custom-card h3 {
+    max-width: 100%;
+    font-size: 13px;
+    line-height: 1.5;
+    padding: 6px 10px;
+  }
+  .stepbar {
+    gap: 5px;
+  }
+  .stepbar span {
+    font-size: 10px;
+    padding: 6px 8px;
+  }
+
+  /* Three comfortable columns for the selection tiles on narrow screens. */
+  .option-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .option-btn {
+    min-width: 0;
+    padding: 4px 2px;
+  }
+  .option-btn canvas {
+    height: 66px;
+    max-width: 100%;
+  }
+  .option-btn span {
+    font-size: 10px;
+    overflow-wrap: anywhere;
+  }
+
+  /* The hair-style strip remains horizontally scrollable, without widening the page. */
+  .option-scroll {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+  .option-scroll .option-grid {
+    width: max-content;
+    min-width: 560px;
+    grid-template-columns: repeat(6, 82px);
+  }
+
+  .preview-character {
+    min-height: 240px;
+    padding: 12px;
+  }
+  #avatarPreview {
+    width: min(190px, 65vw);
+    height: auto;
+    aspect-ratio: 11 / 14;
+  }
+  .message-input {
+    min-height: 130px;
+  }
+  input, textarea, select {
+    font-size: 16px; /* prevents automatic zoom on iOS */
+    min-width: 0;
+  }
+  .previewbubble {
+    width: 100%;
+  }
+
+  button, .button {
+    min-height: 42px;
+    touch-action: manipulation;
+  }
+  .row {
+    align-items: stretch;
+  }
+  .row > * {
+    min-width: 0;
+  }
+
+  .guestwall {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .guesttile {
+    padding: 7px 4px 9px;
+  }
+  .guesttile .bubble {
+    width: 100%;
+    padding: 7px 6px;
+    font-size: 12px;
+    line-height: 1.55;
+  }
+
+  .adminbar,
+  .admin-tools {
+    gap: 7px;
+  }
+  .adminbar button,
+  .admin-tools button {
+    flex: 1 1 calc(50% - 7px);
+    min-width: 0;
+    white-space: normal;
+  }
+  .admin-tools input,
+  .admin-tools select {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+  }
+  .adminlayout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .canvaswrap {
+    max-width: 100%;
+    padding: 5px;
+    max-height: 60vh;
+  }
+  .sidepanel {
+    min-width: 0;
+  }
+
+  #export .row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  #export .row button {
+    width: 100%;
+  }
+  #movieStage {
+    max-width: 100%;
+    height: auto;
+  }
+  footer {
+    padding: 20px 12px 32px;
+  }
+}
+
+@media (max-width: 360px) {
+  main {
+    padding-right: 9px;
+    padding-left: 9px;
+  }
+  .panel {
+    padding: 9px;
+  }
+  .custom-card {
+    padding: 7px;
+  }
+  nav button {
+    font-size: 12px;
+  }
+  .option-btn canvas {
+    height: 60px;
+  }
+}
+
 </style>
 </head>
 <body><div class="ambient" aria-hidden="true">♥　✦　♡　✧　♥</div>
